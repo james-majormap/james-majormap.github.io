@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quest-Map: 인터랙티브 서비스 기획서</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Scholarly Neutrals -->
+    <!-- Application Structure Plan: 사용자의 자연스러운 탐색 여정을 고려하여 '대시보드 → 주제 발견 → 계획 수립 → 포트폴리오 관리'의 흐름을 따르는 허브-앤-스포크(Hub-and-spoke) 모델로 설계했습니다. 각 기능은 독립적인 섹션으로 분리되어 있으며, JS를 통해 동적으로 화면을 전환하여 SPA(단일 페이지 애플리케이션) 경험을 제공합니다. 이 구조는 사용자가 서비스의 핵심 기능을 단계적으로, 그리고 직관적으로 경험하도록 유도하며, 향후 기능 확장에 용이합니다. 프리미엄 기능은 각 기능의 맥락 안에서 자연스럽게 노출하여 전환율을 높이도록 설계했습니다. -->
+    <!-- Visualization & Content Choices: 
+        - 시장 규모(TAM-SAM-SOM): 정보 전달 목적. 간결한 아이콘과 텍스트 카드로 시각화하여 즉각적인 이해를 돕습니다.
+        - 키워드 검색량: 시장 수요 변화를 보여주기 위해 Chart.js를 사용한 라인 차트를 선택했습니다. 시간에 따른 트렌드를 가장 효과적으로 보여주는 방식입니다.
+        - 마인드맵: 주제 발상의 핵심 기능. 복잡한 Canvas 대신, 접근성과 반응형을 고려해 중첩된 리스트(UL/LI)와 Tailwind CSS를 활용한 HTML/CSS 기반으로 구현했습니다. 클릭 시 하위 항목이 토글되는 인터랙션을 추가했습니다.
+        - 주요 기능 비교: 프리미엄 플랜의 가치를 명확히 전달하기 위해 체크마크와 텍스트를 활용한 비교 테이블을 사용했습니다. 이는 가장 보편적이고 효과적인 UX 패턴입니다.
+        - 예상 면접 질문: 아코디언(Accordion) UI를 사용하여 질문 목록을 제공합니다. 사용자가 한 번에 하나의 질문에 집중하고, 클릭 시 '출제 의도'와 '답변 Tip'을 볼 수 있도록 하여 깊이 있는 상호작용을 유도합니다.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 400px; } }
+        .nav-link { transition: all 0.3s ease; }
+        .nav-link.active { color: #1e3a8a; border-bottom-color: #1e3a8a; font-weight: 700; }
+        .nav-link:not(.active) { border-bottom-color: transparent; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .mindmap ul { padding-left: 2rem; border-left: 2px solid #e5e7eb; }
+        .mindmap li { position: relative; margin-top: 0.5rem; }
+        .mindmap li::before { content: ''; position: absolute; top: 12px; left: -2rem; width: 1.5rem; height: 2px; background-color: #e5e7eb; }
+        .mindmap-node { cursor: pointer; }
+        .mindmap-node:hover { background-color: #eff6ff; }
+        .premium-feature-lock { filter: blur(2px); opacity: 0.6; cursor: not-allowed; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="app" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <header class="flex flex-col sm:flex-row justify-between items-center pb-6 border-b-2 border-gray-200">
+            <h1 class="text-3xl font-bold text-blue-900">Quest-Map</h1>
+            <p class="text-gray-500 mt-2 sm:mt-0">학생부종합전형, 데이터로 항해하는 탐구 여정</p>
+        </header>
+
+        <nav class="mt-6">
+            <ul class="flex flex-wrap justify-center sm:justify-start border-b border-gray-200">
+                <li><a href="#dashboard" class="nav-link text-lg p-4 block border-b-2">대시보드</a></li>
+                <li><a href="#market" class="nav-link text-lg p-4 block border-b-2">시장 분석</a></li>
+                <li><a href="#discover" class="nav-link text-lg p-4 block border-b-2">주제 발견</a></li>
+                <li><a href="#portfolio" class="nav-link text-lg p-4 block border-b-2">나의 포트폴리오</a></li>
+                <li><a href="#premium" class="nav-link text-lg p-4 block border-b-2">⭐ 프리미엄</a></li>
+            </ul>
+        </nav>
+
+        <main class="mt-8">
+            <!-- 대시보드 Section -->
+            <section id="dashboard" class="content-section">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold mb-4">안녕하세요, 김메이저님!</h2>
+                    <p class="mb-6">진로를 향한 위대한 탐험, Quest-Map과 함께 시작해 보세요.</p>
+                    <button id="startNewQuestBtn" class="bg-blue-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto">🚀 새로운 탐구 시작하기</button>
+                </div>
+
+                <div class="mt-8">
+                    <h3 class="text-xl font-bold mb-4">진행 중인 탐구</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="ongoingQuests">
+                        <!-- JS로 동적 생성 -->
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <h3 class="text-xl font-bold mb-4">AI 추천 주제</h3>
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <p class="text-gray-600 mb-4">김메이저님의 관심 학과 '컴퓨터공학과'와 관련된 탐구 주제들이에요.</p>
+                        <ul class="space-y-2">
+                            <li class="p-3 bg-blue-50 rounded-md hover:bg-blue-100 cursor-pointer">리눅스와 윈도우 커널 스케줄러 비교 분석</li>
+                            <li class="p-3 bg-blue-50 rounded-md hover:bg-blue-100 cursor-pointer">최신 랜섬웨어 공격 패턴 분석 및 대응 방안 연구</li>
+                            <li class="p-3 bg-blue-50 rounded-md hover:bg-blue-100 cursor-pointer">해시 테이블의 충돌 해결 알고리즘 효율성 비교</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 시장 분석 Section -->
+            <section id="market" class="content-section">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold mb-2">왜 '탐구 활동'이 중요한가요?</h2>
+                    <p class="text-gray-600 mb-6">데이터는 학생들이 이 문제를 해결하기 위해 이미 많은 노력을 기울이고 있음을 보여줍니다.</p>
+                    
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold mb-4 text-center">탐구 주제 관련 키워드 검색량 추이</h3>
+                        <div class="chart-container">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                        <p class="text-center text-sm text-gray-500 mt-2">꾸준하고 높은 검색량은 지속적인 시장의 수요를 의미합니다.</p>
+                    </div>
+                    
+                    <div class="border-t pt-8">
+                        <h3 class="text-xl font-bold mb-4 text-center">우리가 공략할 시장 규모 (TAM-SAM-SOM)</h3>
+                        <div class="grid md:grid-cols-3 gap-6 text-center">
+                            <div class="p-4 bg-gray-100 rounded-lg">
+                                <span class="text-4xl">🌍</span>
+                                <h4 class="font-bold text-lg mt-2">TAM (전체 시장)</h4>
+                                <p class="text-2xl font-bold text-blue-800">120만 명</p>
+                                <p class="text-sm text-gray-500">대한민국 전체 고등학생</p>
+                            </div>
+                            <div class="p-4 bg-gray-100 rounded-lg">
+                                <span class="text-4xl">🎯</span>
+                                <h4 class="font-bold text-lg mt-2">SAM (유효 시장)</h4>
+                                <p class="text-2xl font-bold text-blue-800">48만 명</p>
+                                <p class="text-sm text-gray-500">학종 준비 및 탐구 니즈 학생</p>
+                            </div>
+                            <div class="p-4 bg-gray-100 rounded-lg">
+                                <span class="text-4xl">💡</span>
+                                <h4 class="font-bold text-lg mt-2">SOM (초기 확보 가능 시장)</h4>
+                                <p class="text-2xl font-bold text-blue-800">2.4만 명</p>
+                                <p class="text-sm text-gray-500">출시 1-2년 내 확보 목표</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 주제 발견 Section -->
+            <section id="discover" class="content-section">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold mb-2">무엇을 탐구할지 막막한가요?</h2>
+                    <p class="text-gray-600 mb-6">하나의 키워드에서 시작해 지식의 지도를 펼쳐보세요. 관심 있는 키워드를 입력해 보세요.</p>
+                    <div class="flex">
+                        <input type="text" id="mindmap-input" placeholder="예: 메타버스, 기후 변화, 인공지능..." class="w-full p-3 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <button id="mindmap-btn" class="bg-blue-800 text-white font-bold py-3 px-6 rounded-r-lg hover:bg-blue-700 transition-colors">탐색</button>
+                    </div>
+                </div>
+                <div id="mindmap-container" class="mt-8 bg-white p-6 rounded-lg shadow-sm min-h-[300px]">
+                    <p class="text-gray-500 text-center">키워드를 입력하면 이곳에 탐구 마인드맵이 생성됩니다.</p>
+                </div>
+            </section>
+
+            <!-- 나의 포트폴리오 Section -->
+            <section id="portfolio" class="content-section">
+                 <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold mb-6">나의 탐구 여정</h2>
+                     <div class="border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                            <button id="tab-my-projects" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg text-blue-600 border-blue-600">나의 프로젝트</button>
+                            <button id="tab-hall-of-fame" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg text-gray-500 hover:text-gray-700 hover:border-gray-300">합격 선배 사례 (명예의 전당)</button>
+                        </nav>
+                    </div>
+                 </div>
+                 <div id="portfolio-content-my-projects" class="mt-8">
+                     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="allQuests">
+                        <!-- JS로 동적 생성 -->
+                    </div>
+                 </div>
+                 <div id="portfolio-content-hall-of-fame" class="mt-8 hidden">
+                     <div class="premium-feature-lock p-6 bg-white rounded-lg shadow-sm relative">
+                        <div class="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-10">
+                            <div class="text-center p-4 bg-gray-800 text-white rounded-lg">
+                                <span class="text-2xl">🔒</span>
+                                <p class="font-bold">프리미엄 전용 기능입니다</p>
+                                <button class="mt-2 text-sm text-blue-300 hover:underline" onclick="document.querySelector('a[href=\'#premium\']').click()">자세히 보기</button>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">합격 선배들의 우수 탐구 보고서</h3>
+                        <div class="space-y-4">
+                            <div class="p-4 border rounded-lg">
+                                <p class="font-bold text-blue-800">[컴퓨터공학과 합격] AI 기반 가짜 뉴스 판별 모델 개발</p>
+                                <p class="text-sm text-gray-600">"기존 텍스트 분석 모델의 한계를 지적하고, 최신 트랜스포머 모델을 적용하여 정확도를 95%까지 향상시킨 과정..."</p>
+                            </div>
+                            <div class="p-4 border rounded-lg">
+                                <p class="font-bold text-blue-800">[생명과학과 합격] 미세플라스틱이 담수 생태계에 미치는 영향 분석</p>
+                                <p class="text-sm text-gray-600">"교내 연못에서 직접 채수한 물을 현미경으로 관찰하고, 미세플라스틱 농도에 따른 물벼룩의 생존율 변화를 실험..."</p>
+                            </div>
+                        </div>
+                     </div>
+                 </div>
+            </section>
+            
+            <!-- 프리미엄 Section -->
+            <section id="premium" class="content-section">
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <h2 class="text-3xl font-bold text-center mb-4">당신의 탐구를 한 단계 위로, Quest-Map 프리미엄</h2>
+                    <p class="text-center text-gray-600 max-w-2xl mx-auto mb-10">단순한 계획을 넘어, 합격에 가까워지는 전략적인 탐구를 경험하세요.</p>
+
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div class="p-6 border-2 border-gray-200 rounded-lg">
+                            <h3 class="text-xl font-bold text-center">무료 플랜</h3>
+                            <p class="text-center text-gray-500 mb-6">핵심 기능 체험</p>
+                            <ul class="space-y-4">
+                                <li class="flex items-center"><span class="text-green-500 mr-2">✔️</span> 주제 발견 마인드맵</li>
+                                <li class="flex items-center"><span class="text-green-500 mr-2">✔️</span> 탐구 로드맵 빌더</li>
+                                <li class="flex items-center"><span class="text-green-500 mr-2">✔️</span> 탐구 계획서 생성 (최대 3개)</li>
+                                <li class="flex items-center"><span class="text-red-500 mr-2">❌</span> AI 보고서 초안 피드백</li>
+                                <li class="flex items-center"><span class="text-red-500 mr-2">❌</span> AI 예상 면접 질문 생성</li>
+                                <li class="flex items-center"><span class="text-red-500 mr-2">❌</span> 합격 선배 우수 사례 열람</li>
+                            </ul>
+                        </div>
+                        <div class="p-8 bg-blue-800 text-white rounded-lg transform md:scale-105 shadow-2xl">
+                            <h3 class="text-2xl font-bold text-center">프리미엄 플랜</h3>
+                            <p class="text-center text-blue-200 mb-6">모든 기능 무제한 이용</p>
+                             <ul class="space-y-4 mb-8">
+                                <li class="flex items-center"><span class="text-yellow-300 mr-2">✔️</span> 주제 발견 마인드맵</li>
+                                <li class="flex items-center"><span class="text-yellow-300 mr-2">✔️</span> 탐구 로드맵 빌더</li>
+                                <li class="flex items-center"><span class="text-yellow-300 mr-2">✔️</span> <span class="font-bold">무제한</span> 탐구 계획서 생성</li>
+                                <li class="flex items-center"><span class="text-yellow-300 mr-2">✔️</span> <span class="font-bold">AI 보고서 초안 피드백</span></li>
+                                <li class="flex items-center"><span class="text-yellow-300 mr-2">✔️</span> <span class="font-bold">AI 예상 면접 질문 생성</span></li>
+                                <li class="flex items-center"><span class="text-yellow-300 mr-2">✔️</span> <span class="font-bold">합격 선배 우수 사례 열람</span></li>
+                            </ul>
+                            <button class="w-full bg-yellow-400 text-blue-900 font-bold py-3 rounded-lg hover:bg-yellow-300 transition-colors">월 9,900원으로 시작하기</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI 피드백 및 면접 질문 예시 -->
+                <div class="mt-12">
+                    <h3 class="text-2xl font-bold mb-6 text-center">프리미엄 기능 미리보기</h3>
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <!-- AI 보고서 초안 피드백 예시 -->
+                        <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h4 class="font-bold text-lg mb-4">✨ AI 보고서 초안 피드백</h4>
+                            <div class="bg-gray-50 p-4 rounded-md">
+                                <p class="font-semibold text-gray-700">원본 텍스트:</p>
+                                <p class="text-sm text-gray-600">"저는 인공지능에 대해 알아보았습니다. 인공지능은 여러 분야에서 사용되는 것들을 보며 신기하다고 생각했습니다."</p>
+                            </div>
+                            <div class="mt-4 p-4 bg-blue-50 rounded-md">
+                                <p class="font-semibold text-blue-800">AI 피드백:</p>
+                                <ul class="text-sm space-y-2 mt-2">
+                                    <li><strong class="text-blue-700">[설득력💡]</strong> '알아보았다'는 수동적인 표현보다 'OO라는 기존 이론에 의문을 품고, 그 한계를 검증하기 위해 분석했습니다' 와 같이 주도적인 탐구 과정이 드러나는 표현으로 수정하는 것을 추천합니다.</li>
+                                    <li><strong class="text-blue-700">[명확성💡]</strong> '...같은 것들'이라는 표현은 모호합니다. '자율주행, 의료 진단 등과 같은 분야'처럼 구체적인 예시를 들어 명확성을 높여보세요.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- AI 예상 면접 질문 예시 -->
+                        <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h4 class="font-bold text-lg mb-4">🎙️ AI 예상 면접 질문</h4>
+                            <div id="accordion-example" class="space-y-2">
+                                <div>
+                                    <h5 id="accordion-heading-1">
+                                        <button type="button" class="flex items-center justify-between w-full p-4 font-medium text-left text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200" data-accordion-target="#accordion-body-1">
+                                            <span>탐구를 진행하며 자신의 처음 가설과 달랐던 결과가 나왔다면, 그것은 무엇이었고 어떻게 해석했나요?</span>
+                                            <svg class="w-6 h-6 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                                        </button>
+                                    </h5>
+                                    <div id="accordion-body-1" class="hidden p-4 border border-t-0 border-gray-200 rounded-b-lg">
+                                        <p class="font-semibold text-sm text-blue-800">출제 의도 & Tip:</p>
+                                        <p class="text-sm text-gray-600">이 질문은 지원자의 비판적 사고력과 문제 해결 능력을 확인하기 위함입니다. 예상치 못한 결과에 당황하지 않고, 이를 논리적으로 분석하여 새로운 결론을 도출해내는 과정을 구체적으로 보여주는 것이 좋습니다.</p>
+                                    </div>
+                                </div>
+                                 <div>
+                                    <h5 id="accordion-heading-2">
+                                        <button type="button" class="flex items-center justify-between w-full p-4 font-medium text-left text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200" data-accordion-target="#accordion-body-2">
+                                            <span>이 탐구 활동이 본인이 희망하는 OO학과 공부에 어떤 도움이 될 것이라고 생각하나요?</span>
+                                             <svg class="w-6 h-6 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                                        </button>
+                                    </h5>
+                                    <div id="accordion-body-2" class="hidden p-4 border border-t-0 border-gray-200 rounded-b-lg">
+                                        <p class="font-semibold text-sm text-blue-800">출제 의도 & Tip:</p>
+                                        <p class="text-sm text-gray-600">전공 적합성과 학업에 대한 열정을 평가하는 질문입니다. 탐구를 통해 배운 지식이나 연구 방법론이 대학 공부와 어떻게 연결되는지 구체적인 사례를 들어 답변하면 좋은 인상을 줄 수 있습니다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = {
+                // Mock Data
+                quests: [
+                    { id: 1, title: 'AI 기반 가짜 뉴스 판별 모델 개발', status: '진행 중', progress: 75, major: '컴퓨터공학과' },
+                    { id: 2, title: '미세플라스틱이 담수 생태계에 미치는 영향', status: '완료', progress: 100, major: '생명과학과' },
+                    { id: 3, title: '메타버스 내 디지털 자산의 법적 지위 연구', status: '진행 중', progress: 30, major: '법학과' },
+                ],
+                mindmapData: {
+                    '메타버스': {
+                        '기술적 기반': ['VR/AR 기술', '블록체인과 NFT', '5G 네트워크', '3D 모델링 엔진'],
+                        '사회/문화적 영향': ['새로운 소통 방식', '가상 정체성', '디지털 격차 심화', '게임과 엔터테인먼트'],
+                        '경제적 가치': ['가상 부동산', '디지털 자산 거래', '새로운 비즈니스 모델', '메타버스 관련 직업'],
+                        '윤리적 쟁점': ['개인정보보호 문제', '가상 세계 내 범죄', '현실 도피와 중독', '데이터 편향성'],
+                    },
+                     '기후 변화': {
+                        '원인': ['온실가스 배출', '삼림 벌채', '산업화', '화석 연료 사용'],
+                        '영향': ['해수면 상승', '생물다양성 감소', '이상 기후 현상', '식량 문제'],
+                        '해결 방안': ['신재생에너지 전환', '탄소 포집 기술', '국제 협약 (파리 협정)', '에너지 효율 개선'],
+                        '국제적 동향': ['IPCC 보고서', '유럽 그린딜', '탄소국경세 논의'],
+                    }
+                },
+
+                // DOM Elements
+                navLinks: document.querySelectorAll('.nav-link'),
+                contentSections: document.querySelectorAll('.content-section'),
+                ongoingQuestsContainer: document.getElementById('ongoingQuests'),
+                allQuestsContainer: document.getElementById('allQuests'),
+
+                init() {
+                    this.setupEventListeners();
+                    this.renderQuests();
+                    this.renderTrendChart();
+                    this.handleNavigation();
+                },
+
+                setupEventListeners() {
+                    window.addEventListener('hashchange', this.handleNavigation.bind(this));
+                    
+                    document.getElementById('mindmap-btn').addEventListener('click', this.renderMindmap.bind(this));
+                    document.getElementById('mindmap-input').addEventListener('keyup', (e) => {
+                        if (e.key === 'Enter') this.renderMindmap();
+                    });
+
+                    // Accordion logic for premium examples
+                    document.querySelectorAll('[data-accordion-target]').forEach(button => {
+                        button.addEventListener('click', () => {
+                            const targetId = button.getAttribute('data-accordion-target');
+                            const targetBody = document.querySelector(targetId);
+                            targetBody.classList.toggle('hidden');
+                            button.querySelector('svg').classList.toggle('rotate-180');
+                        });
+                    });
+
+                    // Portfolio Tabs
+                    document.getElementById('tab-my-projects').addEventListener('click', () => this.switchPortfolioTab('my-projects'));
+                    document.getElementById('tab-hall-of-fame').addEventListener('click', () => this.switchPortfolioTab('hall-of-fame'));
+                },
+
+                handleNavigation() {
+                    const hash = window.location.hash || '#dashboard';
+                    
+                    this.navLinks.forEach(link => {
+                        link.classList.toggle('active', link.getAttribute('href') === hash);
+                    });
+
+                    this.contentSections.forEach(section => {
+                        section.classList.toggle('active', `#${section.id}` === hash);
+                    });
+                },
+                
+                switchPortfolioTab(tabName) {
+                    const myProjectsTab = document.getElementById('tab-my-projects');
+                    const hallOfFameTab = document.getElementById('tab-hall-of-fame');
+                    const myProjectsContent = document.getElementById('portfolio-content-my-projects');
+                    const hallOfFameContent = document.getElementById('portfolio-content-hall-of-fame');
+
+                    if (tabName === 'my-projects') {
+                        myProjectsTab.classList.add('text-blue-600', 'border-blue-600');
+                        myProjectsTab.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                        hallOfFameTab.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                        hallOfFameTab.classList.remove('text-blue-600', 'border-blue-600');
+                        myProjectsContent.classList.remove('hidden');
+                        hallOfFameContent.classList.add('hidden');
+                    } else {
+                        hallOfFameTab.classList.add('text-blue-600', 'border-blue-600');
+                        hallOfFameTab.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                        myProjectsTab.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                        myProjectsTab.classList.remove('text-blue-600', 'border-blue-600');
+                        hallOfFameContent.classList.remove('hidden');
+                        myProjectsContent.classList.add('hidden');
+                    }
+                },
+
+                renderQuests() {
+                    const ongoingHtml = this.quests.filter(q => q.status === '진행 중').map(quest => this.createQuestCard(quest)).join('');
+                    this.ongoingQuestsContainer.innerHTML = ongoingHtml || '<p class="text-gray-500">진행 중인 탐구가 없습니다.</p>';
+                    
+                    const allHtml = this.quests.map(quest => this.createQuestCard(quest)).join('');
+                    this.allQuestsContainer.innerHTML = allHtml;
+                },
+
+                createQuestCard(quest) {
+                    const statusColor = quest.status === '완료' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+                    return `
+                        <div class="bg-white p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-lg mb-2 pr-2">${quest.title}</h4>
+                                <span class="text-xs font-semibold px-2 py-1 rounded-full ${statusColor}">${quest.status}</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mb-4">${quest.major}</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${quest.progress}%"></div>
+                            </div>
+                            <p class="text-right text-sm text-gray-500 mt-1">${quest.progress}% 진행</p>
+                        </div>
+                    `;
+                },
+
+                renderMindmap() {
+                    const container = document.getElementById('mindmap-container');
+                    const input = document.getElementById('mindmap-input').value.trim();
+                    const data = this.mindmapData[input];
+
+                    if (!data) {
+                        container.innerHTML = `<p class="text-gray-500 text-center">"${input}"에 대한 마인드맵 데이터를 찾을 수 없습니다. 다른 키워드를 시도해 보세요.</p>`;
+                        return;
+                    }
+
+                    let html = `<div class="mindmap"><ul>`;
+                    for (const category in data) {
+                        html += `<li><strong class="mindmap-node p-2 rounded-md block">${category}</strong>`;
+                        html += `<ul class="hidden">`;
+                        data[category].forEach(item => {
+                            html += `<li><span class="mindmap-node p-2 rounded-md block">${item}</span></li>`;
+                        });
+                        html += `</ul></li>`;
+                    }
+                    html += `</ul></div>`;
+                    container.innerHTML = html;
+
+                    container.querySelectorAll('.mindmap-node').forEach(node => {
+                        if (node.tagName === 'STRONG') {
+                            node.addEventListener('click', (e) => {
+                                e.currentTarget.nextElementSibling.classList.toggle('hidden');
+                            });
+                        }
+                    });
+                },
+
+                renderTrendChart() {
+                    const ctx = document.getElementById('trendChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월'],
+                            datasets: [{
+                                label: '세특 주제',
+                                data: [65, 59, 80, 81, 75, 85, 90],
+                                borderColor: 'rgb(30, 64, 175)',
+                                tension: 0.1,
+                                fill: false
+                            }, {
+                                label: '탐구 보고서 쓰는 법',
+                                data: [45, 49, 60, 71, 66, 75, 82],
+                                borderColor: 'rgb(29, 78, 216)',
+                                tension: 0.1,
+                                fill: false
+                            }, {
+                                label: '생기부 컨설팅',
+                                data: [30, 28, 40, 42, 50, 60, 70],
+                                borderColor: 'rgb(59, 130, 246)',
+                                tension: 0.1,
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'top' },
+                                title: { display: false }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: { display: true, text: '상대적 검색량' }
+                                }
+                            }
+                        }
+                    });
+                }
+            };
+
+            app.init();
+        });
+    </script>
+</body>
+</html>
