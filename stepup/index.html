@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StepUp : 대시보드</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #50E3C2;
+            --background-color: #f4f7f6;
+            --card-background: #ffffff;
+            --text-color: #333;
+            --text-light-color: #777;
+            --border-color: #e0e0e0;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+        }
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            font-size: 28px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        .user-profile {
+            text-align: right;
+        }
+        .user-profile span {
+            font-weight: 700;
+        }
+        .card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+        .card h2 {
+            margin-top: 0;
+            font-size: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* 3.4 맞춤형 활동 추천 */
+        .recommendation-card {
+            border: 2px solid var(--primary-color);
+        }
+        .recommendation-card .tag {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .recommendation-card p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-light-color);
+        }
+        .mission {
+            background-color: var(--background-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .mission-title {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        /* 3.3 진단 리포트 */
+        .diagnostics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        .chart-container, .status-container {
+            text-align: center;
+        }
+        .chart-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .status-list li {
+            text-align: left;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        /* 핵심 액션 버튼 */
+        .actions {
+            display: flex;
+            gap: 15px;
+        }
+        .btn {
+            flex-grow: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-secondary {
+            background-color: var(--card-background);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        /* 3.2 활동 기록 Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none; /* Javascript로 제어 */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 15px;
+            font-family: 'Noto Sans KR', sans-serif;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>StepUp</h1>
+            <div class="user-profile">
+                <strong>박서연</strong>님 (2학년 2학기)<br>
+                <small>목표: 연세대학교 컴퓨터과학과</small>
+            </div>
+        </header>
+
+        <main>
+            <section class="card recommendation-card">
+                <span class="tag">💡 다음 스텝 추천</span>
+                <h2>2학년 2학기, 공동체역량을 채울 마지막 기회!</h2>
+                <p>현재 진로 및 학업역량 관련 활동은 매우 우수하지만, 팀 기반 프로젝트 경험이 부족하여 공동체역량이 약점으로 분석됩니다.</p>
+                <div class="mission">
+                    <div class="mission-title">🚀 미션 1: 교내 해커톤 팀 프로젝트 참여</div>
+                    <small>교내 AI 아이디어 경진대회에 팀을 꾸려 참여해보세요. 기획, 개발, 발표 역할을 분담하며 협업 능력을 어필할 수 있습니다.</small>
+                </div>
+                 <div class="mission">
+                    <div class="mission-title">🤝 미션 2: 1학년 대상 코딩 멘토링</div>
+                    <small>점심시간을 활용해 후배들에게 파이썬 기초를 알려주는 멘토가 되어 나눔과 소통의 리더십을 보여주세요.</small>
+                </div>
+            </section>
+
+            <section class="diagnostics-grid">
+                <div class="card status-container">
+                    <h2>종합 현황</h2>
+                    <ul class="status-list">
+                        <li>총 기록 활동: <strong>38</strong>개</li>
+                        <li>교과학습(세특) 심화: <strong>12</strong>개</li>
+                        <li>동아리/프로젝트: <strong>5</strong>개</li>
+                        <li><strong>진로역량</strong>이 가장 우수해요!</li>
+                        <li><strong>공동체역량</strong> 보완이 필요해요.</li>
+                    </ul>
+                </div>
+                <div class="card chart-container">
+                     <h2>역량 분석 리포트</h2>
+                     <img src="https://placehold.co/300x200/4A90E2/FFFFFF?text=Competency\nRadar+Chart" alt="역량 레이더 차트 예시">
+                </div>
+            </section>
+            
+            <section class="actions">
+                <button class="btn btn-primary" onclick="openModal()">+ 새 활동 기록하기</button>
+                <button class="btn btn-secondary">내 포트폴리오 전체보기</button>
+            </section>
+        </main>
+    </div>
+
+    <div id="activityModal" class="modal">
+        <div class="modal-content">
+            <h2>세부능력 및 특기사항 기록</h2>
+            <form>
+                <div class="form-group">
+                    <label for="subject">연관 과목</label>
+                    <select id="subject" name="subject">
+                        <option>정보</option>
+                        <option>수학Ⅰ</option>
+                        <option>통합사회</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="activityTitle">활동명 / 탐구 주제</label>
+                    <input type="text" id="activityTitle" name="activityTitle" placeholder="예: 딥러닝을 활용한 이미지 인식 모델 연구">
+                </div>
+                 <div class="form-group">
+                    <label for="activityMotive">탐구 계기 / 동기</label>
+                    <textarea id="activityMotive" name="activityMotive" placeholder="수업 시간에 배운 내용 중 어떤 부분에서 호기심이 생겼나요?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="activityDetails">과정 및 내용</label>
+                    <textarea id="activityDetails" name="activityDetails" placeholder="어떤 자료를 찾고, 어떤 실험을 했으며, 그 과정에서 무엇을 알게 되었나요? 구체적으로 작성해주세요."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="activityLearned">배우고 느낀 점</label>
+                    <textarea id="activityLearned" name="activityLearned" placeholder="이 활동을 통해 지식적으로, 내면적으로 어떻게 성장했나요?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="activityFile">관련 자료 첨부</label>
+                    <input type="file" id="activityFile" name="activityFile">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">취소</button>
+                    <button type="submit" class="btn btn-primary">저장하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('activityModal').style.display = 'flex';
+        }
+        function closeModal() {
+            document.getElementById('activityModal').style.display = 'none';
+        }
+        // 모달 바깥을 클릭하면 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('activityModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+
+</body>
+</html>
