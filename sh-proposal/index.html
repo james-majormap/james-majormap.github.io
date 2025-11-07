@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>신한대학교 AI 진로/학습 설계 지원</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Calm Harmony (White/Gray-50 bg, Blue/Green accents) -->
+    <!-- Application Structure Plan: A top-down, narrative SPA matching the source report's flow. Uses a top nav for quick jumps. Sections: 1. The Challenge (Intro), 2. Current Solution (with 2 interactive demos for major/topic exploration), 3. Future Plans (explaining 3 upcoming features). This structure was chosen because the report itself tells a clear "problem -> solution -> future" story, which is highly effective for a non-technical audience. The interactive demos directly model the report's core AI functions for maximum clarity. -->
+    <!-- Visualization & Content Choices:
+        - Report Info: All 5 Mermaid flowcharts.
+        - Goal: Explain complex AI processes.
+        - Viz/Presentation: Recreated *all* 5 diagrams using semantic HTML (divs, spans) and Tailwind (flexbox, grid, borders, bg-colors) to show nodes and data flow.
+        - Interaction: None for the diagrams themselves (they are explanatory).
+        - Justification: **Crucial** to meet the "NO MERMAID JS" and "NO SVG" constraints while faithfully representing the source report's core logic.
+        - Report Info: AI Keyword Cloud.
+        - Goal: Demonstrate major exploration.
+        - Viz/Presentation: HTML span tags styled with Tailwind (bg-blue-200, rounded-full) to mimic a cloud.
+        - Interaction: Dynamically shown/hidden by JS based on a dropdown selection.
+        - Justification: An interactive demo is clearer than a static image.
+        - Report Info: AI Topic Generation.
+        - Goal: Demonstrate topic creation.
+        - Viz/Presentation: An HTML `<ul>` list.
+        - Interaction: Dynamically populated by JS based on two dropdowns and a button click.
+        - Justification: Models the AI engine's "input -> output" process interactively.
+        - Library/Method: Vanilla JS for all interactions. No Chart.js (no quantitative charts in source). -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        .diagram-node {
+            @apply p-4 rounded-lg shadow-md border border-gray-200 text-center;
+        }
+        .diagram-arrow {
+            @apply text-3xl text-gray-400;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <span class="text-2xl font-bold text-blue-600">메이저맵 AI</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#intro" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">소개</a>
+                        <a href="#current" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">현재 AI 솔루션</a>
+                        <a href="#future" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">미래 지원 계획</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Section 1: Introduction -->
+        <section id="intro" class="bg-white py-20 sm:py-28">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+                    신한대학교 자율전공 학생을 위한<br>AI 기반 진로·학습 설계
+                </h1>
+                <p class="mt-6 text-lg leading-8 text-gray-600">
+                    '막연한 탐색'에서 '데이터 기반 설계'로.<br>메이저맵 AI가 자율전공 학생들의 성공적인 여정을 지원합니다.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 1.5: The Challenge -->
+        <section id="challenge" class="py-16 sm:py-24">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-gray-900">자율전공 학생의 여정</h2>
+                    <p class="mt-4 text-lg text-gray-600">고등학생의 진학과 마찬가지로, 자율전공 신입생은 '무엇을 선택할지 모르는 막연함' 속에서 출발합니다.</p>
+                </div>
+
+                <div class="mt-16 max-w-4xl mx-auto">
+                    <div class="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0 md:space-x-4">
+                        <!-- Step 1 -->
+                        <div class="flex flex-col items-center text-center">
+                            <div class="flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full shadow-lg">
+                                <span class="text-4xl">🎓</span>
+                            </div>
+                            <h3 class="mt-4 text-xl font-semibold">1. 입학 (탐색)</h3>
+                            <p class="mt-2 text-gray-600">나의 적성은 무엇일까?</p>
+                        </div>
+                        
+                        <span class="diagram-arrow hidden md:block">→</span>
+                        <span class="diagram-arrow md:hidden">↓</span>
+
+                        <!-- Step 2 -->
+                        <div class="flex flex-col items-center text-center">
+                            <div class="flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full shadow-lg">
+                                <span class="text-4xl">🧭</span>
+                            </div>
+                            <h3 class="mt-4 text-xl font-semibold">2. 전공 선택</h3>
+                            <p class="mt-2 text-gray-600">어떤 전공을 선택해야 할까?</p>
+                        </div>
+                        
+                        <span class="diagram-arrow hidden md:block">→</span>
+                        <span class="diagram-arrow md:hidden">↓</span>
+
+                        <!-- Step 3 -->
+                        <div class="flex flex-col items-center text-center">
+                            <div class="flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full shadow-lg">
+                                <span class="text-4xl">✍️</span>
+                            </div>
+                            <h3 class="mt-4 text-xl font-semibold">3. 심화 설계</h3>
+                            <p class="mt-2 text-gray-600">어떻게 자율 탐구를 설계할까?</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Current Solution -->
+        <section id="current" class="bg-blue-50 py-16 sm:py-24">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-base font-semibold leading-7 text-blue-600">🟢 현재 제공 중인 AI 솔루션</h2>
+                    <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">AI 기반 탐색 및 설계</p>
+                    <p class="mt-6 text-lg leading-8 text-gray-600">학생들은 메이저맵 AI를 통해 '나는 누구인지' 발견하고, '무엇을 탐구할지' 구체적인 주제를 생성할 수 있습니다.</p>
+                </div>
+
+                <div class="space-y-16">
+                    <!-- 2a. Self-Discovery -->
+                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-semibold text-gray-900">가. "나는 누구인가?" : 데이터 기반 진로·적성 검사</h3>
+                        <p class="mt-4 text-gray-600">학생들은 먼저 AI가 분석한 직업 데이터를 기반으로 한 '학과직업선호도검사'를 통해 자신의 흥미 유형과 강점을 객관적인 데이터로 확인합니다. 이는 막연했던 진로 고민의 첫 단추를 꿰는 과정으로, 학생들은 '탐구형', '사회형' 등 자신의 성향을 발견하고 전공 탐색의 방향을 설정합니다.</p>
+                    </div>
+
+                    <!-- 2b. AI Bridge Diagram -->
+                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-semibold text-gray-900">나. "검사 결과와 전공의 연결": AI가 '막연함'을 '명확함'으로</h3>
+                        <p class="mt-4 text-gray-600">기존 진로 탐색의 가장 큰 어려움은 '사회형'이라는 결과를 받아도, 수많은 '사회형' 전공 중 무엇이 나에게 맞는지 알기 어렵다는 점입니다. 메이저맵 AI는 이 단절된 지점을 연결합니다.</p>
+                        
+                        <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                            <!-- Diagram: Before -->
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <h4 class="text-lg font-semibold text-center text-red-600">기존 방식의 문제점</h4>
+                                <div class="mt-6 flex flex-col items-center space-y-4">
+                                    <div class="diagram-node bg-gray-100 w-full">적성 검사 결과<br>'사회형(S-type)'</div>
+                                    <div class="diagram-arrow text-red-500">↓</div>
+                                    <div class="diagram-node bg-red-100 text-red-800 w-full text-2xl font-bold">???</div>
+                                    <div class="diagram-arrow text-red-500">↓</div>
+                                    <div class="w-full text-center space-y-2">
+                                        <div class="diagram-node bg-gray-50 w-full">미디어커뮤니케이션?</div>
+                                        <div class="diagram-node bg-gray-50 w-full">사회복지?</div>
+                                        <div class="diagram-node bg-gray-50 w-full">행정학?</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Diagram: After -->
+                            <div class="border border-gray-200 rounded-lg p-6 bg-blue-50">
+                                <h4 class="text-lg font-semibold text-center text-blue-600">메이저맵 AI Bridge 솔루션</h4>
+                                <div class="mt-6 flex flex-col items-center space-y-4">
+                                    <div class="diagram-node bg-gray-100 w-full">적성 검사 결과<br>'사회형(S-type)'</div>
+                                    <div class="diagram-arrow text-blue-500">↓</div>
+                                    <div class="diagram-node bg-blue-100 text-blue-800 w-full">
+                                        <strong class="font-bold">메이저맵 AI Bridge</strong><br>AI가 전공 데이터(커리큘럼, 논문 등)<br>사전 분석 및 핵심 키워드 추출
+                                    </div>
+                                    <div class="diagram-arrow text-blue-500">↓</div>
+                                    <div class="w-full text-left space-y-2">
+                                        <div class="diagram-node bg-white w-full"><strong>미디어커뮤니케이션</strong><br>키워드: 'UX/UI', '콘텐츠 기획'</div>
+                                        <div class="diagram-node bg-white w-full"><strong>사회복지</strong><br>키워드: '상담', '정책', '현장실습'</div>
+                                        <div class="diagram-node bg-white w-full"><strong>행정학</strong><br>키워드: '공공정책', '조직관리'</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2c. Major Exploration Demo -->
+                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-semibold text-gray-900">다. "어떤 전공이 맞는가?" : AI 추출 키워드로 탐색 (Demo)</h3>
+                        <p class="mt-4 text-gray-600">관심 있는 전공을 선택해보세요. AI가 해당 전공의 핵심 키워드와 관련 정보를 즉시 보여줍니다.</p>
+                        
+                        <div class="mt-6 max-w-lg mx-auto">
+                            <label for="major-select" class="block text-sm font-medium text-gray-700">전공 선택하기:</label>
+                            <select id="major-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                <option value="">-- 전공을 선택하세요 --</option>
+                                <option value="media">미디어커뮤니케이션</option>
+                                <option value="biz">경영학과</option>
+                                <option value="cs">컴퓨터공학과</option>
+                            </select>
+                        </div>
+
+                        <div id="major-info-container" class="mt-8 hidden transition-all duration-500 ease-in-out opacity-0">
+                            <!-- Keyword Cloud -->
+                            <div>
+                                <h4 class="text-lg font-semibold">AI 기반 핵심 키워드</h4>
+                                <div id="keyword-cloud" class="mt-4 flex flex-wrap gap-2 items-center">
+                                    <!-- JS will populate this -->
+                                </div>
+                            </div>
+                            <!-- Related Info -->
+                            <div class="mt-8">
+                                <h4 class="text-lg font-semibold">관련 정보</h4>
+                                <div id="related-info" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <!-- JS will populate this -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2d. Topic Generation Demo -->
+                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-semibold text-gray-900">라. "무엇을 탐구할 것인가?" : AI 기반 심화 탐구 주제 생성 (Demo)</h3>
+                        <p class="mt-4 text-gray-600">자신의 관심 전공 키워드와 트렌드 키워드를 조합하여, AI에게 구체적인 심화 탐구 주제를 추천받아 보세요.</p>
+
+                        <div class="mt-8 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                            <!-- Input 1 -->
+                            <div class="w-full">
+                                <label for="major-keyword" class="block text-sm font-medium text-gray-700">1. 관심 전공 키워드</label>
+                                <select id="major-keyword" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    <option>AI</option>
+                                    <option>심리학</option>
+                                    <option>경영학</option>
+                                </select>
+                            </div>
+                            <!-- Input 2 -->
+                            <div class="w-full">
+                                <label for="trend-keyword" class="block text-sm font-medium text-gray-700">2. 관심 트렌드 키워드</label>
+                                <select id="trend-keyword" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    <option>업사이클링</option>
+                                    <option>ESG</option>
+                                    <option>메타버스</option>
+                                </select>
+                            </div>
+                            <!-- Button -->
+                            <button id="topic-button" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-semibold">
+                                AI 주제 생성하기
+                            </button>
+                        </div>
+
+                        <div id="topic-results-container" class="mt-8 hidden transition-all duration-500 ease-in-out opacity-0">
+                            <h4 class="text-lg font-semibold">AI 추천 탐구 주제 리스트</h4>
+                            <ul id="topic-results" class="mt-4 list-disc list-inside space-y-2 text-gray-700 bg-gray-50 p-6 rounded-lg">
+                                <!-- JS will populate this -->
+                            </ul>
+                            <p class="mt-4 text-sm text-gray-500">이 주제들을 바탕으로 '탐구 동기, 활동 계획, 후속 탐구'를 포함한 자신만의 심화 탐구 보고서를 설계할 수 있습니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Future Plans -->
+        <section id="future" class="bg-white py-16 sm:py-24">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-base font-semibold leading-7 text-green-600">🟡 향후 제공 예정인 AI 계획</h2>
+                    <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">차세대 심화학습 지원</p>
+                    <p class="mt-6 text-lg leading-8 text-gray-600">전공 선택 이후, 학생들의 '자율적인 심화학습 설계' 과정을 AI가 1:1로 지원합니다.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- 4a. Roadmap Advisor -->
+                    <div class="flex flex-col bg-gray-50 p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-semibold text-gray-900">가. "AI 학습 로드맵 어드바이저"</h3>
+                        <p class="mt-4 text-gray-600">'AI 마케팅 전문가'와 같은 목표를 설정하면, AI가 과목 수강, 논문 분석, 프로젝트 기획까지 이어지는 '심화학습 설계도'를 함께 만들어 줍니다.</p>
+                        <div class="mt-8 flex-grow flex flex-col items-center justify-center space-y-4">
+                            <div class="diagram-node bg-green-100 text-green-800 w-full">학생 목표 설정<br>'AI 마케팅 전문가 되기'</div>
+                            <div class="diagram-arrow text-green-500">↓</div>
+                            <div class="diagram-node bg-white w-full">1단계: 필수 전공/논문 추천</div>
+                            <div class="diagram-arrow text-green-500">↓</div>
+                            <div class="diagram-node bg-white w-full">2단계: 소규모 프로젝트 기획 제안</div>
+                            <div class="diagram-arrow text-green-500">↓</div>
+                            <div class="diagram-node bg-white w-full">3단계: 관련 기업 사례 분석</div>
+                        </div>
+                    </div>
+
+                    <!-- 4b. Conversational AI -->
+                    <div class="flex flex-col bg-gray-50 p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-semibold text-gray-900">나. "대화형 AI 연구 비서"</h3>
+                        <p class="mt-4 text-gray-600">탐구 과정에서 필요한 정보를 대화형 AI에게 요청하고 요약받을 수 있습니다.</p>
+                        
+                        <!-- Mock Chat -->
+                        <div class="mt-8 space-y-3">
+                            <div class="flex justify-end">
+                                <p class="bg-blue-600 text-white p-3 rounded-lg max-w-xs">"심리학과 AI 논문 3편 찾아서 3줄로 요약해 줘."</p>
+                            </div>
+                            <div class="flex justify-start">
+                                <p class="bg-gray-200 text-gray-800 p-3 rounded-lg max-w-xs">"네. '논문 검색 AI'와 '요약 AI'가 작업을 처리 중입니다..."</p>
+                            </div>
+                        </div>
+
+                        <!-- Router/Expert Diagram -->
+                        <div class="mt-6 flex-grow flex flex-col items-center justify-center space-y-4">
+                            <div class="diagram-node bg-green-100 text-green-800 w-full">총괄 지휘자 AI (라우터)</div>
+                            <div class="flex justify-center w-full space-x-4">
+                                <div class="diagram-arrow text-green-500">↘</div>
+                                <div class="diagram-arrow text-green-500">↙</div>
+                            </div>
+                            <div class="flex justify-between w-full space-x-4">
+                                <div class="diagram-node bg-white w-1/2">논문 검색 AI</div>
+                                <div class="diagram-node bg-white w-1/2">텍스트 요약 AI</div>
+                            </div>
+                            <div class="flex justify-center w-full space-x-4">
+                                <div class="diagram-arrow text-green-500">↙</div>
+                                <div class="diagram-arrow text-green-500">↘</div>
+                            </div>
+                            <div class="diagram-node bg-green-100 text-green-800 w-full">최종 답변 생성</div>
+                        </div>
+                    </div>
+
+                    <!-- 4c. Grade/Quota Advisor -->
+                    <div class="flex flex-col bg-gray-50 p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-semibold text-gray-900">다. "AI 성적·정원 분석 어드바이저"</h3>
+                        <p class="mt-4 text-gray-600">학생의 적성뿐만 아니라 '성적'과 '학과별 정원 캡' 정보를 교차 분석하여, 현실적인 전공 배정 전략을 제안합니다.</p>
+                        
+                        <div class="mt-8 flex-grow flex flex-col items-center justify-center space-y-4">
+                            <!-- Inputs -->
+                            <div class="flex w-full space-x-4">
+                                <div class="diagram-node bg-white w-1/2">학생 성적 데이터</div>
+                                <div class="diagram-node bg-white w-1/2">학생 적성 데이터</div>
+                            </div>
+                            <div class="flex justify-center w-full space-x-4">
+                                <div class="diagram-arrow text-green-500">↙</div>
+                                <div class="diagram-arrow text-green-500">↘</div>
+                            </div>
+                            
+                            <!-- Engine -->
+                            <div class="diagram-node bg-green-100 text-green-800 w-full">
+                                <strong>AI 성적·정원 분석 엔진</strong><br>+ 학과별 정원 캡 (150%)
+                            </div>
+                            
+                            <div class="diagram-arrow text-green-500">↓</div>
+
+                            <!-- Decision -->
+                            <div class="diagram-node bg-yellow-100 text-yellow-800 w-full p-3">
+                                1순위 '컴퓨터공학과' 배정 가능?
+                            </div>
+
+                            <!-- Outputs -->
+                            <div class="flex justify-between w-full space-x-4">
+                                <div class="flex flex-col items-center w-1/2">
+                                    <span class="text-lg font-semibold text-red-500">낮음 ↘</span>
+                                    <div class="diagram-node bg-red-100 text-red-800 w-full mt-2">
+                                        "1순위 배정은 어려울 수 있습니다. 2순위 '데이터사이언스'를 제안합니다."
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center w-1/2">
+                                    <span class="text-lg font-semibold text-green-500">높음 ↙</span>
+                                    <div class="diagram-node bg-green-100 text-green-800 w-full mt-2">
+                                        "1순위 배정 가능성이 높습니다. 심화 학습을 계속하세요."
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p>&copy; 2025 메이저맵 (MajorMap). All rights reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">신한대학교 자율전공 학생들의 성공적인 미래를 응원합니다.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Data for Demos ---
+            const majorData = {
+                'media': {
+                    keywords: ['콘텐츠 기획', 'UX/UI', '플랫폼', '영상 제작', '저널리즘', '데이터 분석', '1인 미디어', '광고홍보'],
+                    related: [
+                        { title: '추천 도서', body: '"플랫폼의 생각법", "UX/UI의 10가지 심리학 법칙"' },
+                        { title: '졸업 후 진로', body: '콘텐츠 기획자, UX/UI 디자이너, 데이터 분석가, PD' }
+                    ]
+                },
+                'biz': {
+                    keywords: ['마케팅', '재무', '인사(HR)', 'ESG', '회계', '경영전략', '데이터 분석', '조직관리'],
+                    related: [
+                        { title: '추천 도서', body: '"마케팅 불변의 법칙", "ESG 경영의 바이블"' },
+                        { title: '졸업 후 진로', body: '마케터, 재무 분석가, 인사 담당자, 경영 컨설턴트' }
+                    ]
+                },
+                'cs': {
+                    keywords: ['AI', '알고리즘', '데이터베이스', '네트워크', '보안', '소프트웨어 공학', '웹 프로그래밍', '머신러닝'],
+                    related: [
+                        { title: '추천 도서', body: '"클린 코드(Clean Code)", "AI 100"' },
+                        { title: '졸업 후 진로', body: '백엔드 개발자, AI 엔지니어, 데이터 과학자, 보안 전문가' }
+                    ]
+                }
+            };
+
+            const topicData = {
+                'AI': {
+                    '업사이클링': [
+                        'AI 기반 이미지 인식을 통한 폐기물 자동 분류 및 업사이클링 효율화 방안 연구',
+                        '업사이클링 제품 수요 예측을 위한 머신러닝 모델 개발',
+                        'AI 챗봇을 활용한 업사이클링 교육 및 인식 개선 프로그램 제안'
+                    ],
+                    'ESG': [
+                        '기업의 ESG 경영 활동 데이터와 재무 성과 간의 AI 기반 상관관계 분석',
+                        'AI를 활용한 ESG 평가 모델의 편향성 탐지 및 개선 방안 연구',
+                        '중소기업을 위한 AI 기반 ESG 경영 관리 솔루션 프로토타입 제안'
+                    ],
+                    '메타버스': [
+                        '메타버스 내 사용자 행동 패턴 분석을 위한 AI 알고리즘 연구',
+                        'AI NPC를 활용한 메타버스 교육 프로그램의 효과성 검증',
+                        'AI와 메타버스를 결합한 가상 심리 상담 솔루션 개발'
+                    ]
+                },
+                '심리학': {
+                    '업사이클링': [
+                        '업사이클링 제품 구매 행동에 영향을 미치는 심리적 요인 분석',
+                        '환경보호 실천(업사이클링)이 개인의 심리적 웰빙에 미치는 영향 연구',
+                        '업사이클링 동참을 유도하는 넛지(Nudge) 디자인의 심리학적 원리 탐구'
+                    ],
+                    'ESG': [
+                        'ESG 경영이 조직 구성원의 직무 만족도 및 조직 몰입에 미치는 심리적 영향',
+                        '소비자의 윤리적 소비 동기와 ESG 제품 선택 간의 관계 (심리학적 접근)',
+                        'ESG 활동의 진정성이 기업 이미지에 미치는 영향에 대한 심리학적 고찰'
+                    ],
+                    '메타버스': [
+                        '메타버스 내 아바타와 사용자 본인의 자아 정체성 간의 심리학적 관계',
+                        '가상현실(메타버스) 환경이 사회적 불안감 감소에 미치는 심리치료 효과 연구',
+                        '메타버스 환경에서의 비대면 상호작용이 신뢰 형성에 미치는 심리적 요인'
+                    ]
+                },
+                '경영학': {
+                    '업사이클링': [
+                        '업사이클링 제품의 브랜딩 전략과 소비자 인식 변화에 대한 경영학적 분석',
+                        '지속가능경영(업사이클링)을 통한 기업의 경쟁 우위 확보 사례 연구',
+                        '업사이클링 스타트업의 성공적인 비즈니스 모델 구축 방안'
+                    ],
+                    'ESG': [
+                        'ESG 경영 도입이 기업 가치에 미치는 영향에 대한 재무적 분석',
+                        'ESG 성과와 기업의 리스크 관리(경영학) 간의 연관성 연구',
+                        '효과적인 ESG 경영을 위한 조직 구조 및 인사(HR) 전략 제안'
+                    ],
+                    '메타버스': [
+                        '메타버스를 활용한 새로운 마케팅 채널 전략 (경영학적 접근)',
+                        '메타버스 환경에서의 가상 경제 시스템과 비즈니스 모델 연구',
+                        '원격 근무 환경(메타버스)이 조직 생산성에 미치는 영향 분석 (경영학)'
+                    ]
+                }
+            };
+
+            // --- Demo 1: Major Exploration ---
+            const majorSelect = document.getElementById('major-select');
+            const infoContainer = document.getElementById('major-info-container');
+            const keywordCloud = document.getElementById('keyword-cloud');
+            const relatedInfo = document.getElementById('related-info');
+
+            majorSelect.addEventListener('change', () => {
+                const selectedMajor = majorSelect.value;
+                if (selectedMajor && majorData[selectedMajor]) {
+                    const data = majorData[selectedMajor];
+                    
+                    // Populate Keyword Cloud
+                    keywordCloud.innerHTML = data.keywords.map(keyword => 
+                        `<span class="bg-blue-100 text-blue-800 text-sm font-medium mr-2 mb-2 px-3 py-1 rounded-full">${keyword}</span>`
+                    ).join('');
+                    
+                    // Populate Related Info
+                    relatedInfo.innerHTML = data.related.map(item => 
+                        `<div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <h5 class="font-semibold text-blue-700">${item.title}</h5>
+                            <p class="text-gray-700">${item.body}</p>
+                        </div>`
+                    ).join('');
+
+                    // Show container
+                    infoContainer.classList.remove('hidden');
+                    setTimeout(() => infoContainer.classList.add('opacity-100'), 10);
+
+                } else {
+                    // Hide container
+                    infoContainer.classList.remove('opacity-100');
+                    setTimeout(() => infoContainer.classList.add('hidden'), 500);
+                }
+            });
+
+            // --- Demo 2: Topic Generation ---
+            const majorKeywordSelect = document.getElementById('major-keyword');
+            const trendKeywordSelect = document.getElementById('trend-keyword');
+            const topicButton = document.getElementById('topic-button');
+            const topicResultsContainer = document.getElementById('topic-results-container');
+            const topicResultsList = document.getElementById('topic-results');
+
+            topicButton.addEventListener('click', () => {
+                const majorKey = majorKeywordSelect.value;
+                const trendKey = trendKeywordSelect.value;
+
+                if (topicData[majorKey] && topicData[majorKey][trendKey]) {
+                    const topics = topicData[majorKey][trendKey];
+                    topicResultsList.innerHTML = topics.map(topic => 
+                        `<li class="py-1">${topic}</li>`
+                    ).join('');
+
+                    // Show container
+                    topicResultsContainer.classList.remove('hidden');
+                    setTimeout(() => topicResultsContainer.classList.add('opacity-100'), 10);
+                }
+            });
+
+            // --- Smooth Scrolling ---
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
