@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#1a2332">
+  <title>Paper Reader</title>
+  <link rel="stylesheet" href="style.css?v=5">
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="logo">PaperReader</div>
+    <div class="controls">
+      <div class="toggle-wrapper">
+        <span class="toggle-label">Compare</span>
+        <label class="switch">
+          <input type="checkbox" id="compare-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <button id="lang-toggle" class="btn" aria-label="Toggle Language">
+        <span class="lang-text">EN</span> / <span class="lang-text">KO</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="reading-progress"><div class="reading-progress-bar" id="progress-bar"></div></div>
+
+  <nav class="paper-nav">
+    <div id="paper-list" class="scroll-tabs"></div>
+  </nav>
+
+  <main id="content-viewer" class="content-area">
+    <div class="placeholder">
+      <p>Select a paper to start reading.</p>
+    </div>
+  </main>
+
+  <button class="back-to-top" id="back-to-top" aria-label="Back to top">&uarr;</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="data_md.js?v=5"></script>
+  <script src="app.js?v=7"></script>
+</body>
+
+</html>
