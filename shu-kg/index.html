@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KG Graph Viewer - 20260324T081715Z</title>
+  <style>
+    :root {
+      --bg: #f7f7f4;
+      --panel: #ffffff;
+      --line: #d4d4d8;
+      --text: #18181b;
+      --muted: #52525b;
+      --accent: #2563eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top left, #fdf6e3 0%, var(--bg) 42%);
+      color: var(--text);
+      font-family: "Helvetica Neue", Arial, sans-serif;
+    }
+    .page {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 24px;
+      padding: 24px;
+    }
+    .main {
+      display: grid;
+      gap: 20px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid #e4e4e7;
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 16px 40px rgba(24, 24, 27, 0.06);
+    }
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.1;
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .stat-card {
+      background: #fafaf9;
+      border: 1px solid #e7e5e4;
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .stat-value {
+      margin-top: 4px;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 18px;
+    }
+    .section-copy {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .svg-frame {
+      overflow: auto;
+      border: 1px solid #e7e5e4;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #fafaf9 100%);
+    }
+    svg {
+      display: block;
+      width: 100%;
+      min-width: 960px;
+      height: auto;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #fafaf9;
+      border: 1px solid #e7e5e4;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .legend-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+    }
+    .sidebar {
+      display: grid;
+      gap: 16px;
+      align-self: start;
+      position: sticky;
+      top: 16px;
+    }
+    .node-groups {
+      display: grid;
+      gap: 14px;
+    }
+    .node-group h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .node-button-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    button.node-button {
+      border: 1px solid #d4d4d8;
+      background: #ffffff;
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    button.node-button:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 12px;
+      line-height: 1.45;
+      color: #27272a;
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 14px;
+      padding: 14px;
+      max-height: 70vh;
+      overflow: auto;
+    }
+    @media (max-width: 1100px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <main class="main">
+      <section class="panel hero">
+        <h1>KG Graph Viewer</h1>
+        <p>run_id: 20260324T081715Z | nodes 36 | edges 92 | provenance 1</p>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Run</div><div class="stat-value">20260324T081715Z</div></div>
+          <div class="stat-card"><div class="stat-label">Nodes</div><div class="stat-value">36</div></div>
+          <div class="stat-card"><div class="stat-label">Edges</div><div class="stat-value">92</div></div>
+          <div class="stat-card"><div class="stat-label">Provenance</div><div class="stat-value">1</div></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title">Overview</h2>
+        <p class="section-copy">문서, 개정본, 부서, 스냅샷 사이의 핵심 관계를 요약해서 보여줍니다. 상세 연결은 오른쪽 패널에서 노드를 클릭해 확인할 수 있습니다.</p>
+        <div class="legend"><span class="legend-item"><span class="legend-swatch" style="background:#f59e0b"></span>Department</span><span class="legend-item"><span class="legend-swatch" style="background:#2563eb"></span>RuleDocument</span><span class="legend-item"><span class="legend-swatch" style="background:#0891b2"></span>Revision</span><span class="legend-item"><span class="legend-swatch" style="background:#059669"></span>RuleSection</span><span class="legend-item"><span class="legend-swatch" style="background:#7c3aed"></span>SourceSnapshot</span></div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Department</div><div class="stat-value">1</div></div>
+<div class="stat-card"><div class="stat-label">Revision</div><div class="stat-value">1</div></div>
+<div class="stat-card"><div class="stat-label">RuleDocument</div><div class="stat-value">1</div></div>
+<div class="stat-card"><div class="stat-label">RuleSection</div><div class="stat-value">32</div></div>
+<div class="stat-card"><div class="stat-label">SourceSnapshot</div><div class="stat-value">1</div></div>
+        </div>
+        <div class="svg-frame">
+          <svg viewBox="0 0 1080 202" role="img" aria-label="Overview">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#a1a1aa"></polygon>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1080" height="202" fill="#fffefc"></rect>
+  <g>
+  <line x1="540" y1="109.0" x2="620" y2="109.0" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="580.0" y="101.0" text-anchor="middle" font-size="11" fill="#71717a">HAS_REVISION</text>
+</g>
+<g>
+  <line x1="540" y1="109.0" x2="120" y2="109.0" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="330.0" y="101.0" text-anchor="middle" font-size="11" fill="#71717a">ISSUED_BY</text>
+</g>
+<g>
+  <line x1="800" y1="109.0" x2="880" y2="109.0" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="840.0" y="101.0" text-anchor="middle" font-size="11" fill="#71717a">DERIVED_FROM</text>
+</g>
+  <g onclick="showNode('dept_대외국제처')" style="cursor:pointer">
+  <title>대외국제처
+Department</title>
+  <rect x="120" y="72" width="180" height="74" rx="18" ry="18" fill="#f59e0b" opacity="0.96"></rect>
+  <text>
+    <tspan x="134" y="98" font-size="14" font-weight="700" fill="#ffffff">대외국제처</tspan><tspan x="134" y="128" font-size="11" fill="rgba(255,255,255,0.82)">Department</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651')" style="cursor:pointer">
+  <title>글로벌허브센터 운영 규정
+RuleDocument</title>
+  <rect x="360" y="72" width="180" height="74" rx="18" ry="18" fill="#2563eb" opacity="0.96"></rect>
+  <text>
+    <tspan x="374" y="98" font-size="14" font-weight="700" fill="#ffffff">글로벌허브센터 운영 규정</tspan><tspan x="374" y="128" font-size="11" fill="rgba(255,255,255,0.82)">RuleDocument</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105')" style="cursor:pointer">
+  <title>글로벌허브센터 운영 규정
+Revision</title>
+  <rect x="620" y="72" width="180" height="74" rx="18" ry="18" fill="#0891b2" opacity="0.96"></rect>
+  <text>
+    <tspan x="634" y="98" font-size="14" font-weight="700" fill="#ffffff">글로벌허브센터 운영 규정</tspan><tspan x="634" y="128" font-size="11" fill="rgba(255,255,255,0.82)">Revision</tspan>
+  </text>
+</g>
+<g onclick="showNode('snapshot_20260324T081715Z_law_651_rev_2105')" style="cursor:pointer">
+  <title>law_651_rev_2105
+SourceSnapshot</title>
+  <rect x="880" y="72" width="180" height="74" rx="18" ry="18" fill="#7c3aed" opacity="0.96"></rect>
+  <text>
+    <tspan x="894" y="98" font-size="14" font-weight="700" fill="#ffffff">law_651_rev_2105</tspan><tspan x="894" y="128" font-size="11" fill="rgba(255,255,255,0.82)">SourceSnapshot</tspan>
+  </text>
+</g>
+</svg>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title">Section Structure</h2>
+        <p class="section-copy">`RuleSection` 노드만 따로 배치해 장, 조, 부칙의 구조를 읽기 쉽게 보여줍니다.</p>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">DERIVED_FROM</div><div class="stat-value">33</div></div>
+<div class="stat-card"><div class="stat-label">HAS_REVISION</div><div class="stat-value">1</div></div>
+<div class="stat-card"><div class="stat-label">HAS_SECTION</div><div class="stat-value">32</div></div>
+<div class="stat-card"><div class="stat-label">ISSUED_BY</div><div class="stat-value">1</div></div>
+<div class="stat-card"><div class="stat-label">PARENT_SECTION</div><div class="stat-value">25</div></div>
+        </div>
+        <div class="svg-frame">
+          <svg viewBox="0 0 980 3176" role="img" aria-label="RuleSection Hierarchy">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#a1a1aa"></polygon>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="980" height="3176" fill="#fffefc"></rect>
+  <g>
+  <line x1="352" y1="87.0" x2="430" y2="94.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="79.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="87.0" x2="430" y2="208.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="79.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="87.0" x2="430" y2="322.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="79.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="453.0" x2="430" y2="460.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="445.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="453.0" x2="430" y2="574.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="445.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="453.0" x2="430" y2="688.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="445.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="819.0" x2="430" y2="826.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="811.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="819.0" x2="430" y2="940.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="811.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1071.0" x2="430" y2="1078.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1063.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1071.0" x2="430" y2="1192.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1063.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1071.0" x2="430" y2="1306.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1063.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1071.0" x2="430" y2="1420.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1063.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1071.0" x2="430" y2="1534.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1063.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1071.0" x2="430" y2="1648.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1063.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1779.0" x2="430" y2="1786.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1771.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1779.0" x2="430" y2="1900.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1771.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1779.0" x2="430" y2="2014.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1771.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1779.0" x2="430" y2="2128.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1771.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1779.0" x2="430" y2="2242.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1771.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1779.0" x2="430" y2="2356.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1771.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1779.0" x2="430" y2="2470.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1771.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1779.0" x2="430" y2="2584.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1771.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="1779.0" x2="430" y2="2698.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="1771.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="2829.0" x2="430" y2="2836.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="2821.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+<g>
+  <line x1="352" y1="2829.0" x2="430" y2="2950.0" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"></line>
+  <text x="391.0" y="2821.0" text-anchor="middle" font-size="11" fill="#71717a">PARENT_SECTION</text>
+</g>
+  <g onclick="showNode('law_651_rev_2105_sec_001')" style="cursor:pointer">
+  <title>제1장 총칙
+RuleSection</title>
+  <rect x="72" y="48" width="280" height="78" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="86" y="74" font-size="14" font-weight="700" fill="#ffffff">제1장 총칙</tspan><tspan x="86" y="108" font-size="11" fill="rgba(255,255,255,0.82)">RuleSection</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_002')" style="cursor:pointer">
+  <title>제1조(목적)
+이 규정은 삼육보건대학교(이하 “대학”이라 한다)에 재학하는 외국인 유학생의 대학생활 적응 및 학업·진로·취업·정착을 지원하기 위하여 글로벌허브센터(이...</title>
+  <rect x="430" y="48" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="74" font-size="14" font-weight="700" fill="#ffffff">제1조(목적)</tspan><tspan x="444" y="122" font-size="11" fill="rgba(255,255,255,0.82)">이 규정은 삼육보건대학교(이하 “대학”이라 한다)에 재학하는 외국인 유학생의 대...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_003')" style="cursor:pointer">
+  <title>제2조(정의)
+이 규정에서 사용하는 용어의 뜻은 다음과 같다. 1. “외국인 유학생”이란 대학에 입학·편입학·교환/연수 등으로 등록하여 수학 중인 외국 국적 학생을 ...</title>
+  <rect x="430" y="162" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="188" font-size="14" font-weight="700" fill="#ffffff">제2조(정의)</tspan><tspan x="444" y="236" font-size="11" fill="rgba(255,255,255,0.82)">이 규정에서 사용하는 용어의 뜻은 다음과 같다. 1. “외국인 유학생”이란 대학...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_004')" style="cursor:pointer">
+  <title>제3조(적용범위)
+센터의 사업은 외국인 유학생을 원칙 대상으로 하되, 필요 시 어학연수생 및 단기연수생 등으로 확대할 수 있다.</title>
+  <rect x="430" y="276" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="302" font-size="14" font-weight="700" fill="#ffffff">제3조(적용범위)</tspan><tspan x="444" y="350" font-size="11" fill="rgba(255,255,255,0.82)">센터의 사업은 외국인 유학생을 원칙 대상으로 하되, 필요 시 어학연수생 및 단기...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_005')" style="cursor:pointer">
+  <title>제2장 설치 및 기능
+RuleSection</title>
+  <rect x="72" y="414" width="280" height="78" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="86" y="440" font-size="14" font-weight="700" fill="#ffffff">제2장 설치 및 기능</tspan><tspan x="86" y="474" font-size="11" fill="rgba(255,255,255,0.82)">RuleSection</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_006')" style="cursor:pointer">
+  <title>제4조(설치)
+대학은 외국인 유학생 지원을 위하여 센터를 둔다.</title>
+  <rect x="430" y="414" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="440" font-size="14" font-weight="700" fill="#ffffff">제4조(설치)</tspan><tspan x="444" y="488" font-size="11" fill="rgba(255,255,255,0.82)">대학은 외국인 유학생 지원을 위하여 센터를 둔다.</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_007')" style="cursor:pointer">
+  <title>제5조(기능)
+센터는 다음 각 호의 업무를 수행한다. 1. 외국인 유학생 학생지원(상담·고충처리·민원조정) 2. SHU CARE 프로그램의 기획·운영 및 성과관리 3...</title>
+  <rect x="430" y="528" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="554" font-size="14" font-weight="700" fill="#ffffff">제5조(기능)</tspan><tspan x="444" y="602" font-size="11" fill="rgba(255,255,255,0.82)">센터는 다음 각 호의 업무를 수행한다. 1. 외국인 유학생 학생지원(상담·고충처...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_008')" style="cursor:pointer">
+  <title>제6조(세부사업의 예시)
+센터는 제5조의 기능 수행을 위해 다음의 세부 프로그램을 운영할 수 있다. 1. 신입 유학생 적응·오리엔테이션(다국어 공지·안내 포함) 2. SHU B...</title>
+  <rect x="430" y="642" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="668" font-size="14" font-weight="700" fill="#ffffff">제6조(세부사업의 예시)</tspan><tspan x="444" y="716" font-size="11" fill="rgba(255,255,255,0.82)">센터는 제5조의 기능 수행을 위해 다음의 세부 프로그램을 운영할 수 있다. 1...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_009')" style="cursor:pointer">
+  <title>제3장 조직 및 운영
+RuleSection</title>
+  <rect x="72" y="780" width="280" height="78" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="86" y="806" font-size="14" font-weight="700" fill="#ffffff">제3장 조직 및 운영</tspan><tspan x="86" y="840" font-size="11" fill="rgba(255,255,255,0.82)">RuleSection</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_010')" style="cursor:pointer">
+  <title>제7조(센터장)
+① 센터에는 센터장 1인을 두며, 센터장은 센터 업무를 총괄한다. ② 센터장은 외국인 유학생 지원과 관련하여 학내·외 협력기관과의 업무협약을 추진할 수...</title>
+  <rect x="430" y="780" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="806" font-size="14" font-weight="700" fill="#ffffff">제7조(센터장)</tspan><tspan x="444" y="854" font-size="11" fill="rgba(255,255,255,0.82)">① 센터에는 센터장 1인을 두며, 센터장은 센터 업무를 총괄한다. ② 센터장은 ...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_011')" style="cursor:pointer">
+  <title>제8조(직원 및 지원단)
+① 센터에는 실무를 담당하는 직원을 둘 수 있다. ② 센터는 프로그램 운영을 위하여 재학생 멘토 등 “학생지원단”을 둘 수 있다.</title>
+  <rect x="430" y="894" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="920" font-size="14" font-weight="700" fill="#ffffff">제8조(직원 및 지원단)</tspan><tspan x="444" y="968" font-size="11" fill="rgba(255,255,255,0.82)">① 센터에는 실무를 담당하는 직원을 둘 수 있다. ② 센터는 프로그램 운영을 위...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_012')" style="cursor:pointer">
+  <title>제4장 글로벌허브센터 운영위원회
+RuleSection</title>
+  <rect x="72" y="1032" width="280" height="78" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="86" y="1058" font-size="14" font-weight="700" fill="#ffffff">제4장 글로벌허브센터 운영위원회</tspan><tspan x="86" y="1092" font-size="11" fill="rgba(255,255,255,0.82)">RuleSection</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_013')" style="cursor:pointer">
+  <title>제9조(설치)
+센터의 주요 정책과 사업을 심의하기 위하여 글로벌허브센터 운영위원회(이하 “위원회”라 한다)를 둔다.</title>
+  <rect x="430" y="1032" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="1058" font-size="14" font-weight="700" fill="#ffffff">제9조(설치)</tspan><tspan x="444" y="1106" font-size="11" fill="rgba(255,255,255,0.82)">센터의 주요 정책과 사업을 심의하기 위하여 글로벌허브센터 운영위원회(이하 “위원...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_014')" style="cursor:pointer">
+  <title>제10조(구성)
+① 위원회는 다음 각 호의 위원으로 구성한다. 1. 글로벌허브센터장(의장) 2. 한국어교육원 팀장(서기) 3. 글로벌허브센터 직원(필요 인원) 4. 글...</title>
+  <rect x="430" y="1146" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="1172" font-size="14" font-weight="700" fill="#ffffff">제10조(구성)</tspan><tspan x="444" y="1220" font-size="11" fill="rgba(255,255,255,0.82)">① 위원회는 다음 각 호의 위원으로 구성한다. 1. 글로벌허브센터장(의장) 2...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_015')" style="cursor:pointer">
+  <title>제11조(임기)
+보직에 따른 당연직 위원의 임기는 해당 보직 재임기간으로 한다.</title>
+  <rect x="430" y="1260" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="1286" font-size="14" font-weight="700" fill="#ffffff">제11조(임기)</tspan><tspan x="444" y="1334" font-size="11" fill="rgba(255,255,255,0.82)">보직에 따른 당연직 위원의 임기는 해당 보직 재임기간으로 한다.</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_016')" style="cursor:pointer">
+  <title>제12조(기능)
+위원회는 다음 각 호의 사항을 심의·조정한다. 1. 외국인 유학생 지원 기본계획 및 연간 사업계획 2. SHU CARE 프로그램의 신설·폐지·평가 및 ...</title>
+  <rect x="430" y="1374" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="1400" font-size="14" font-weight="700" fill="#ffffff">제12조(기능)</tspan><tspan x="444" y="1448" font-size="11" fill="rgba(255,255,255,0.82)">위원회는 다음 각 호의 사항을 심의·조정한다. 1. 외국인 유학생 지원 기본계획...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_017')" style="cursor:pointer">
+  <title>제13조(회의)
+① 정기회의는 학기별 1회 개최함을 원칙으로 하며, 필요 시 의장이 임시회의를 소집할 수 있다. ② 회의는 재적위원 과반수 출석으로 개의하고, 출석위원...</title>
+  <rect x="430" y="1488" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="1514" font-size="14" font-weight="700" fill="#ffffff">제13조(회의)</tspan><tspan x="444" y="1562" font-size="11" fill="rgba(255,255,255,0.82)">① 정기회의는 학기별 1회 개최함을 원칙으로 하며, 필요 시 의장이 임시회의를 ...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_018')" style="cursor:pointer">
+  <title>제14조(자문 및 소위원회)
+① 위원회는 안건의 전문성 확보를 위해 관련 교원·전문가를 자문위원으로 위촉할 수 있다. ② 특히 응급의료·안전 관련 안건은 별도의 소위원회(또는 실무...</title>
+  <rect x="430" y="1602" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="1628" font-size="14" font-weight="700" fill="#ffffff">제14조(자문 및 소위원회)</tspan><tspan x="444" y="1676" font-size="11" fill="rgba(255,255,255,0.82)">① 위원회는 안건의 전문성 확보를 위해 관련 교원·전문가를 자문위원으로 위촉할 ...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_019')" style="cursor:pointer">
+  <title>제5장 외국인 유학생 응급의료 지원체계
+RuleSection</title>
+  <rect x="72" y="1740" width="280" height="78" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="86" y="1766" font-size="14" font-weight="700" fill="#ffffff">제5장 외국인 유학생 응급의료 지</tspan><tspan x="86" y="1784" font-size="14" font-weight="700" fill="#ffffff">원체계</tspan><tspan x="86" y="1800" font-size="11" fill="rgba(255,255,255,0.82)">RuleSection</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_020')" style="cursor:pointer">
+  <title>제15조(목적)
+이 장은 외국인 유학생의 응급상황에서 신속한 의료접근을 보장하고, 치료비 부담으로 인한 학업중단을 예방하기 위하여 응급의료 지원체계를 구축·운영함을 목...</title>
+  <rect x="430" y="1740" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="1766" font-size="14" font-weight="700" fill="#ffffff">제15조(목적)</tspan><tspan x="444" y="1814" font-size="11" fill="rgba(255,255,255,0.82)">이 장은 외국인 유학생의 응급상황에서 신속한 의료접근을 보장하고, 치료비 부담으...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_021')" style="cursor:pointer">
+  <title>제16조(응급의료 지원체계의 구성)
+센터는 다음 각 호의 체계를 구축·운영한다. 1. 24시간 응급의료 핫라인 운영(유학생 전용 연락체계) 2. 상황평가(트리아지) 및 119 등 공적 긴...</title>
+  <rect x="430" y="1854" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="1880" font-size="14" font-weight="700" fill="#ffffff">제16조(응급의료 지원체계의 구성</tspan><tspan x="444" y="1898" font-size="14" font-weight="700" fill="#ffffff">)</tspan><tspan x="444" y="1928" font-size="11" fill="rgba(255,255,255,0.82)">센터는 다음 각 호의 체계를 구축·운영한다. 1. 24시간 응급의료 핫라인 운영...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_022')" style="cursor:pointer">
+  <title>제17조(응급의료지원금의 설치)
+① 대학은 외국인 유학생의 응급상황 치료비를 지원하기 위하여 응급의료지원금(이하 “지원금”이라 한다)을 둘 수 있다. ② 지원금의 재원은 대학회계, 혁...</title>
+  <rect x="430" y="1968" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="1994" font-size="14" font-weight="700" fill="#ffffff">제17조(응급의료지원금의 설치)</tspan><tspan x="444" y="2042" font-size="11" fill="rgba(255,255,255,0.82)">① 대학은 외국인 유학생의 응급상황 치료비를 지원하기 위하여 응급의료지원금(이하...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_023')" style="cursor:pointer">
+  <title>제18조(지원대상 및 지원범위)
+① 지원대상은 다음 각 호 중 하나에 해당하는 외국인 유학생으로 한다. 1. 응급질환 또는 사고 등으로 즉시 진료가 필요한 자 2. 긴급치료(준응급 포...</title>
+  <rect x="430" y="2082" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="2108" font-size="14" font-weight="700" fill="#ffffff">제18조(지원대상 및 지원범위)</tspan><tspan x="444" y="2156" font-size="11" fill="rgba(255,255,255,0.82)">① 지원대상은 다음 각 호 중 하나에 해당하는 외국인 유학생으로 한다. 1. 응...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_024')" style="cursor:pointer">
+  <title>제19조(지원기준 및 한도)
+① 지원금은 다음 기준을 원칙으로 하되, 개별 사정에 따라 위원회가 조정할 수 있다. 응급 질환: 1회 최대 1,000,000원, 연간 최대 2,000...</title>
+  <rect x="430" y="2196" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="2222" font-size="14" font-weight="700" fill="#ffffff">제19조(지원기준 및 한도)</tspan><tspan x="444" y="2270" font-size="11" fill="rgba(255,255,255,0.82)">① 지원금은 다음 기준을 원칙으로 하되, 개별 사정에 따라 위원회가 조정할 수 ...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_025')" style="cursor:pointer">
+  <title>제20조(신청 및 심사절차)
+① 신청은 원칙적으로 본인 신청으로 하되, 응급상황에서는 센터가 대리 신청할 수 있다. ② 신청서류는 다음 각 호로 한다. 1. 지원금 신청서(개인정보...</title>
+  <rect x="430" y="2310" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="2336" font-size="14" font-weight="700" fill="#ffffff">제20조(신청 및 심사절차)</tspan><tspan x="444" y="2384" font-size="11" fill="rgba(255,255,255,0.82)">① 신청은 원칙적으로 본인 신청으로 하되, 응급상황에서는 센터가 대리 신청할 수...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_026')" style="cursor:pointer">
+  <title>제21조(심사체계)
+① 지원금 심사는 글로벌허브센터 운영위원회가 수행한다. ② 의장은 심사의 공정성과 전문성 확보를 위해 간호·보건의료 분야 교원 또는 외부 의료전문가를 ...</title>
+  <rect x="430" y="2424" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="2450" font-size="14" font-weight="700" fill="#ffffff">제21조(심사체계)</tspan><tspan x="444" y="2498" font-size="11" fill="rgba(255,255,255,0.82)">① 지원금 심사는 글로벌허브센터 운영위원회가 수행한다. ② 의장은 심사의 공정성...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_027')" style="cursor:pointer">
+  <title>제22조(기록관리 및 비밀유지)
+① 센터는 지원금 운영대장, 지급결정서, 증빙서류를 5년간 보관한다. ② 의료정보 등 민감정보는 관련 법령 및 대학 개인정보보호 기준에 따라 최소범위로...</title>
+  <rect x="430" y="2538" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="2564" font-size="14" font-weight="700" fill="#ffffff">제22조(기록관리 및 비밀유지)</tspan><tspan x="444" y="2612" font-size="11" fill="rgba(255,255,255,0.82)">① 센터는 지원금 운영대장, 지급결정서, 증빙서류를 5년간 보관한다. ② 의료정...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_028')" style="cursor:pointer">
+  <title>제23조(교육 및 예방)
+① 센터는 매 학기 유학생 대상 응급대응 안내(119 이용, 응급실 이용 절차, 보험/비자 연계)를 실시할 수 있다. ② 센터는 학과·기숙사·지역기관과...</title>
+  <rect x="430" y="2652" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="2678" font-size="14" font-weight="700" fill="#ffffff">제23조(교육 및 예방)</tspan><tspan x="444" y="2726" font-size="11" fill="rgba(255,255,255,0.82)">① 센터는 매 학기 유학생 대상 응급대응 안내(119 이용, 응급실 이용 절차,...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_029')" style="cursor:pointer">
+  <title>제6장 보칙
+RuleSection</title>
+  <rect x="72" y="2790" width="280" height="78" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="86" y="2816" font-size="14" font-weight="700" fill="#ffffff">제6장 보칙</tspan><tspan x="86" y="2850" font-size="11" fill="rgba(255,255,255,0.82)">RuleSection</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_030')" style="cursor:pointer">
+  <title>제24조(성과평가 및 환류)
+센터는 프로그램 만족도, 참여율, 중도탈락 예방, 취업·비자전환 등 성과지표를 설정하여 매년 위원회에 보고하고 개선계획을 수립한다.</title>
+  <rect x="430" y="2790" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="2816" font-size="14" font-weight="700" fill="#ffffff">제24조(성과평가 및 환류)</tspan><tspan x="444" y="2864" font-size="11" fill="rgba(255,255,255,0.82)">센터는 프로그램 만족도, 참여율, 중도탈락 예방, 취업·비자전환 등 성과지표를 ...</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_031')" style="cursor:pointer">
+  <title>제25조(준용)
+이 규정에 정하지 아니한 사항은 대학의 관련 규정 및 위원회 의결에 따른다.</title>
+  <rect x="430" y="2904" width="470" height="92" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="444" y="2930" font-size="14" font-weight="700" fill="#ffffff">제25조(준용)</tspan><tspan x="444" y="2978" font-size="11" fill="rgba(255,255,255,0.82)">이 규정에 정하지 아니한 사항은 대학의 관련 규정 및 위원회 의결에 따른다.</tspan>
+  </text>
+</g>
+<g onclick="showNode('law_651_rev_2105_sec_032')" style="cursor:pointer">
+  <title>부 칙(2026.2.2.)
+1. 이 규정은 2026년 1월 1일부터 시행한다.</title>
+  <rect x="72" y="3042" width="280" height="78" rx="18" ry="18" fill="#059669" opacity="0.96"></rect>
+  <text>
+    <tspan x="86" y="3068" font-size="14" font-weight="700" fill="#ffffff">부 칙(2026.2.2.)</tspan><tspan x="86" y="3102" font-size="11" fill="rgba(255,255,255,0.82)">1. 이 규정은 2026년 1월 1일부터 시행한다.</tspan>
+  </text>
+</g>
+</svg>
+        </div>
+      </section>
+    </main>
+
+    <aside class="sidebar">
+      <section class="panel">
+        <h2 class="section-title">Node Browser</h2>
+        <div id="node-groups" class="node-groups"></div>
+      </section>
+      <section class="panel">
+        <h2 class="section-title">Details</h2>
+        <pre id="details-panel">{
+  &quot;run_id&quot;: &quot;20260324T081715Z&quot;,
+  &quot;summary&quot;: {
+    &quot;node_count&quot;: 36,
+    &quot;edge_count&quot;: 92,
+    &quot;provenance_count&quot;: 1,
+    &quot;node_counts_by_type&quot;: {
+      &quot;Department&quot;: 1,
+      &quot;Revision&quot;: 1,
+      &quot;RuleDocument&quot;: 1,
+      &quot;RuleSection&quot;: 32,
+      &quot;SourceSnapshot&quot;: 1
+    },
+    &quot;edge_counts_by_type&quot;: {
+      &quot;DERIVED_FROM&quot;: 33,
+      &quot;HAS_REVISION&quot;: 1,
+      &quot;HAS_SECTION&quot;: 32,
+      &quot;ISSUED_BY&quot;: 1,
+      &quot;PARENT_SECTION&quot;: 25
+    }
+  },
+  &quot;provenance&quot;: [
+    {
+      &quot;content_hash&quot;: &quot;6053621ec4ed43c399e24839d46cec403008fa03f2d8175b61bd98bb0cc6e457&quot;,
+      &quot;crawl_run_id&quot;: &quot;20260324T081715Z&quot;,
+      &quot;id&quot;: &quot;snapshot_20260324T081715Z_law_651_rev_2105&quot;,
+      &quot;raw_paths&quot;: [
+        &quot;raw/http/law_651_page.html&quot;,
+        &quot;raw/http/law_651_meta.json&quot;,
+        &quot;raw/http/law_651_revision_2105.json&quot;
+      ],
+      &quot;retrieved_at&quot;: &quot;2026-03-24T08:17:15.419779+00:00&quot;,
+      &quot;snapshot_path&quot;: &quot;raw/http/law_651_revision_2105.json&quot;,
+      &quot;source_url&quot;: &quot;https://rule.shu.ac.kr/law/lawView.html?id=651&quot;
+    }
+  ]
+}</pre>
+      </section>
+    </aside>
+  </div>
+
+  <script>
+    const graphData = {"run_id": "20260324T081715Z", "summary": {"node_count": 36, "edge_count": 92, "provenance_count": 1, "node_counts_by_type": {"Department": 1, "Revision": 1, "RuleDocument": 1, "RuleSection": 32, "SourceSnapshot": 1}, "edge_counts_by_type": {"DERIVED_FROM": 33, "HAS_REVISION": 1, "HAS_SECTION": 32, "ISSUED_BY": 1, "PARENT_SECTION": 25}}, "overview": {"width": 1080, "height": 202, "nodes": [{"id": "dept_대외국제처", "type": "Department", "label": "대외국제처", "preview": "Department", "x": 120, "y": 72, "width": 180, "height": 74}, {"id": "law_651", "type": "RuleDocument", "label": "글로벌허브센터 운영 규정", "preview": "RuleDocument", "x": 360, "y": 72, "width": 180, "height": 74}, {"id": "law_651_rev_2105", "type": "Revision", "label": "글로벌허브센터 운영 규정", "preview": "Revision", "x": 620, "y": 72, "width": 180, "height": 74}, {"id": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "SourceSnapshot", "label": "law_651_rev_2105", "preview": "SourceSnapshot", "x": 880, "y": 72, "width": 180, "height": 74}], "edges": [{"id": "edge_law_651_has_revision_2105", "type": "HAS_REVISION", "from": "law_651", "to": "law_651_rev_2105", "x1": 540, "y1": 109.0, "x2": 620, "y2": 109.0}, {"id": "edge_law_651_issued_by_dept_대외국제처", "type": "ISSUED_BY", "from": "law_651", "to": "dept_대외국제처", "x1": 540, "y1": 109.0, "x2": 120, "y2": 109.0}, {"id": "edge_law_651_rev_2105_derived_from_snapshot", "type": "DERIVED_FROM", "from": "law_651_rev_2105", "to": "snapshot_20260324T081715Z_law_651_rev_2105", "x1": 800, "y1": 109.0, "x2": 880, "y2": 109.0}]}, "sections": {"width": 980, "height": 3176, "nodes": [{"id": "law_651_rev_2105_sec_001", "type": "RuleSection", "label": "제1장 총칙", "preview": "RuleSection", "x": 72, "y": 48, "width": 280, "height": 78}, {"id": "law_651_rev_2105_sec_002", "type": "RuleSection", "label": "제1조(목적)", "preview": "이 규정은 삼육보건대학교(이하 “대학”이라 한다)에 재학하는 외국인 유학생의 대학생활 적응 및 학업·진로·취업·정착을 지원하기 위하여 글로벌허브센터(이...", "x": 430, "y": 48, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_003", "type": "RuleSection", "label": "제2조(정의)", "preview": "이 규정에서 사용하는 용어의 뜻은 다음과 같다. 1. “외국인 유학생”이란 대학에 입학·편입학·교환/연수 등으로 등록하여 수학 중인 외국 국적 학생을 ...", "x": 430, "y": 162, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_004", "type": "RuleSection", "label": "제3조(적용범위)", "preview": "센터의 사업은 외국인 유학생을 원칙 대상으로 하되, 필요 시 어학연수생 및 단기연수생 등으로 확대할 수 있다.", "x": 430, "y": 276, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_005", "type": "RuleSection", "label": "제2장 설치 및 기능", "preview": "RuleSection", "x": 72, "y": 414, "width": 280, "height": 78}, {"id": "law_651_rev_2105_sec_006", "type": "RuleSection", "label": "제4조(설치)", "preview": "대학은 외국인 유학생 지원을 위하여 센터를 둔다.", "x": 430, "y": 414, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_007", "type": "RuleSection", "label": "제5조(기능)", "preview": "센터는 다음 각 호의 업무를 수행한다. 1. 외국인 유학생 학생지원(상담·고충처리·민원조정) 2. SHU CARE 프로그램의 기획·운영 및 성과관리 3...", "x": 430, "y": 528, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_008", "type": "RuleSection", "label": "제6조(세부사업의 예시)", "preview": "센터는 제5조의 기능 수행을 위해 다음의 세부 프로그램을 운영할 수 있다. 1. 신입 유학생 적응·오리엔테이션(다국어 공지·안내 포함) 2. SHU B...", "x": 430, "y": 642, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_009", "type": "RuleSection", "label": "제3장 조직 및 운영", "preview": "RuleSection", "x": 72, "y": 780, "width": 280, "height": 78}, {"id": "law_651_rev_2105_sec_010", "type": "RuleSection", "label": "제7조(센터장)", "preview": "① 센터에는 센터장 1인을 두며, 센터장은 센터 업무를 총괄한다. ② 센터장은 외국인 유학생 지원과 관련하여 학내·외 협력기관과의 업무협약을 추진할 수...", "x": 430, "y": 780, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_011", "type": "RuleSection", "label": "제8조(직원 및 지원단)", "preview": "① 센터에는 실무를 담당하는 직원을 둘 수 있다. ② 센터는 프로그램 운영을 위하여 재학생 멘토 등 “학생지원단”을 둘 수 있다.", "x": 430, "y": 894, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_012", "type": "RuleSection", "label": "제4장 글로벌허브센터 운영위원회", "preview": "RuleSection", "x": 72, "y": 1032, "width": 280, "height": 78}, {"id": "law_651_rev_2105_sec_013", "type": "RuleSection", "label": "제9조(설치)", "preview": "센터의 주요 정책과 사업을 심의하기 위하여 글로벌허브센터 운영위원회(이하 “위원회”라 한다)를 둔다.", "x": 430, "y": 1032, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_014", "type": "RuleSection", "label": "제10조(구성)", "preview": "① 위원회는 다음 각 호의 위원으로 구성한다. 1. 글로벌허브센터장(의장) 2. 한국어교육원 팀장(서기) 3. 글로벌허브센터 직원(필요 인원) 4. 글...", "x": 430, "y": 1146, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_015", "type": "RuleSection", "label": "제11조(임기)", "preview": "보직에 따른 당연직 위원의 임기는 해당 보직 재임기간으로 한다.", "x": 430, "y": 1260, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_016", "type": "RuleSection", "label": "제12조(기능)", "preview": "위원회는 다음 각 호의 사항을 심의·조정한다. 1. 외국인 유학생 지원 기본계획 및 연간 사업계획 2. SHU CARE 프로그램의 신설·폐지·평가 및 ...", "x": 430, "y": 1374, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_017", "type": "RuleSection", "label": "제13조(회의)", "preview": "① 정기회의는 학기별 1회 개최함을 원칙으로 하며, 필요 시 의장이 임시회의를 소집할 수 있다. ② 회의는 재적위원 과반수 출석으로 개의하고, 출석위원...", "x": 430, "y": 1488, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_018", "type": "RuleSection", "label": "제14조(자문 및 소위원회)", "preview": "① 위원회는 안건의 전문성 확보를 위해 관련 교원·전문가를 자문위원으로 위촉할 수 있다. ② 특히 응급의료·안전 관련 안건은 별도의 소위원회(또는 실무...", "x": 430, "y": 1602, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_019", "type": "RuleSection", "label": "제5장 외국인 유학생 응급의료 지원체계", "preview": "RuleSection", "x": 72, "y": 1740, "width": 280, "height": 78}, {"id": "law_651_rev_2105_sec_020", "type": "RuleSection", "label": "제15조(목적)", "preview": "이 장은 외국인 유학생의 응급상황에서 신속한 의료접근을 보장하고, 치료비 부담으로 인한 학업중단을 예방하기 위하여 응급의료 지원체계를 구축·운영함을 목...", "x": 430, "y": 1740, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_021", "type": "RuleSection", "label": "제16조(응급의료 지원체계의 구성)", "preview": "센터는 다음 각 호의 체계를 구축·운영한다. 1. 24시간 응급의료 핫라인 운영(유학생 전용 연락체계) 2. 상황평가(트리아지) 및 119 등 공적 긴...", "x": 430, "y": 1854, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_022", "type": "RuleSection", "label": "제17조(응급의료지원금의 설치)", "preview": "① 대학은 외국인 유학생의 응급상황 치료비를 지원하기 위하여 응급의료지원금(이하 “지원금”이라 한다)을 둘 수 있다. ② 지원금의 재원은 대학회계, 혁...", "x": 430, "y": 1968, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_023", "type": "RuleSection", "label": "제18조(지원대상 및 지원범위)", "preview": "① 지원대상은 다음 각 호 중 하나에 해당하는 외국인 유학생으로 한다. 1. 응급질환 또는 사고 등으로 즉시 진료가 필요한 자 2. 긴급치료(준응급 포...", "x": 430, "y": 2082, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_024", "type": "RuleSection", "label": "제19조(지원기준 및 한도)", "preview": "① 지원금은 다음 기준을 원칙으로 하되, 개별 사정에 따라 위원회가 조정할 수 있다. 응급 질환: 1회 최대 1,000,000원, 연간 최대 2,000...", "x": 430, "y": 2196, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_025", "type": "RuleSection", "label": "제20조(신청 및 심사절차)", "preview": "① 신청은 원칙적으로 본인 신청으로 하되, 응급상황에서는 센터가 대리 신청할 수 있다. ② 신청서류는 다음 각 호로 한다. 1. 지원금 신청서(개인정보...", "x": 430, "y": 2310, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_026", "type": "RuleSection", "label": "제21조(심사체계)", "preview": "① 지원금 심사는 글로벌허브센터 운영위원회가 수행한다. ② 의장은 심사의 공정성과 전문성 확보를 위해 간호·보건의료 분야 교원 또는 외부 의료전문가를 ...", "x": 430, "y": 2424, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_027", "type": "RuleSection", "label": "제22조(기록관리 및 비밀유지)", "preview": "① 센터는 지원금 운영대장, 지급결정서, 증빙서류를 5년간 보관한다. ② 의료정보 등 민감정보는 관련 법령 및 대학 개인정보보호 기준에 따라 최소범위로...", "x": 430, "y": 2538, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_028", "type": "RuleSection", "label": "제23조(교육 및 예방)", "preview": "① 센터는 매 학기 유학생 대상 응급대응 안내(119 이용, 응급실 이용 절차, 보험/비자 연계)를 실시할 수 있다. ② 센터는 학과·기숙사·지역기관과...", "x": 430, "y": 2652, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_029", "type": "RuleSection", "label": "제6장 보칙", "preview": "RuleSection", "x": 72, "y": 2790, "width": 280, "height": 78}, {"id": "law_651_rev_2105_sec_030", "type": "RuleSection", "label": "제24조(성과평가 및 환류)", "preview": "센터는 프로그램 만족도, 참여율, 중도탈락 예방, 취업·비자전환 등 성과지표를 설정하여 매년 위원회에 보고하고 개선계획을 수립한다.", "x": 430, "y": 2790, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_031", "type": "RuleSection", "label": "제25조(준용)", "preview": "이 규정에 정하지 아니한 사항은 대학의 관련 규정 및 위원회 의결에 따른다.", "x": 430, "y": 2904, "width": 470, "height": 92}, {"id": "law_651_rev_2105_sec_032", "type": "RuleSection", "label": "부 칙(2026.2.2.)", "preview": "1. 이 규정은 2026년 1월 1일부터 시행한다.", "x": 72, "y": 3042, "width": 280, "height": 78}], "edges": [{"id": "edge_law_651_rev_2105_sec_001_parent_of_law_651_rev_2105_sec_002", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_001", "to": "law_651_rev_2105_sec_002", "x1": 352, "y1": 87.0, "x2": 430, "y2": 94.0}, {"id": "edge_law_651_rev_2105_sec_001_parent_of_law_651_rev_2105_sec_003", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_001", "to": "law_651_rev_2105_sec_003", "x1": 352, "y1": 87.0, "x2": 430, "y2": 208.0}, {"id": "edge_law_651_rev_2105_sec_001_parent_of_law_651_rev_2105_sec_004", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_001", "to": "law_651_rev_2105_sec_004", "x1": 352, "y1": 87.0, "x2": 430, "y2": 322.0}, {"id": "edge_law_651_rev_2105_sec_005_parent_of_law_651_rev_2105_sec_006", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_005", "to": "law_651_rev_2105_sec_006", "x1": 352, "y1": 453.0, "x2": 430, "y2": 460.0}, {"id": "edge_law_651_rev_2105_sec_005_parent_of_law_651_rev_2105_sec_007", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_005", "to": "law_651_rev_2105_sec_007", "x1": 352, "y1": 453.0, "x2": 430, "y2": 574.0}, {"id": "edge_law_651_rev_2105_sec_005_parent_of_law_651_rev_2105_sec_008", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_005", "to": "law_651_rev_2105_sec_008", "x1": 352, "y1": 453.0, "x2": 430, "y2": 688.0}, {"id": "edge_law_651_rev_2105_sec_009_parent_of_law_651_rev_2105_sec_010", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_009", "to": "law_651_rev_2105_sec_010", "x1": 352, "y1": 819.0, "x2": 430, "y2": 826.0}, {"id": "edge_law_651_rev_2105_sec_009_parent_of_law_651_rev_2105_sec_011", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_009", "to": "law_651_rev_2105_sec_011", "x1": 352, "y1": 819.0, "x2": 430, "y2": 940.0}, {"id": "edge_law_651_rev_2105_sec_012_parent_of_law_651_rev_2105_sec_013", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_012", "to": "law_651_rev_2105_sec_013", "x1": 352, "y1": 1071.0, "x2": 430, "y2": 1078.0}, {"id": "edge_law_651_rev_2105_sec_012_parent_of_law_651_rev_2105_sec_014", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_012", "to": "law_651_rev_2105_sec_014", "x1": 352, "y1": 1071.0, "x2": 430, "y2": 1192.0}, {"id": "edge_law_651_rev_2105_sec_012_parent_of_law_651_rev_2105_sec_015", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_012", "to": "law_651_rev_2105_sec_015", "x1": 352, "y1": 1071.0, "x2": 430, "y2": 1306.0}, {"id": "edge_law_651_rev_2105_sec_012_parent_of_law_651_rev_2105_sec_016", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_012", "to": "law_651_rev_2105_sec_016", "x1": 352, "y1": 1071.0, "x2": 430, "y2": 1420.0}, {"id": "edge_law_651_rev_2105_sec_012_parent_of_law_651_rev_2105_sec_017", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_012", "to": "law_651_rev_2105_sec_017", "x1": 352, "y1": 1071.0, "x2": 430, "y2": 1534.0}, {"id": "edge_law_651_rev_2105_sec_012_parent_of_law_651_rev_2105_sec_018", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_012", "to": "law_651_rev_2105_sec_018", "x1": 352, "y1": 1071.0, "x2": 430, "y2": 1648.0}, {"id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_020", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_019", "to": "law_651_rev_2105_sec_020", "x1": 352, "y1": 1779.0, "x2": 430, "y2": 1786.0}, {"id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_021", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_019", "to": "law_651_rev_2105_sec_021", "x1": 352, "y1": 1779.0, "x2": 430, "y2": 1900.0}, {"id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_022", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_019", "to": "law_651_rev_2105_sec_022", "x1": 352, "y1": 1779.0, "x2": 430, "y2": 2014.0}, {"id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_023", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_019", "to": "law_651_rev_2105_sec_023", "x1": 352, "y1": 1779.0, "x2": 430, "y2": 2128.0}, {"id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_024", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_019", "to": "law_651_rev_2105_sec_024", "x1": 352, "y1": 1779.0, "x2": 430, "y2": 2242.0}, {"id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_025", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_019", "to": "law_651_rev_2105_sec_025", "x1": 352, "y1": 1779.0, "x2": 430, "y2": 2356.0}, {"id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_026", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_019", "to": "law_651_rev_2105_sec_026", "x1": 352, "y1": 1779.0, "x2": 430, "y2": 2470.0}, {"id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_027", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_019", "to": "law_651_rev_2105_sec_027", "x1": 352, "y1": 1779.0, "x2": 430, "y2": 2584.0}, {"id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_028", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_019", "to": "law_651_rev_2105_sec_028", "x1": 352, "y1": 1779.0, "x2": 430, "y2": 2698.0}, {"id": "edge_law_651_rev_2105_sec_029_parent_of_law_651_rev_2105_sec_030", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_029", "to": "law_651_rev_2105_sec_030", "x1": 352, "y1": 2829.0, "x2": 430, "y2": 2836.0}, {"id": "edge_law_651_rev_2105_sec_029_parent_of_law_651_rev_2105_sec_031", "type": "PARENT_SECTION", "from": "law_651_rev_2105_sec_029", "to": "law_651_rev_2105_sec_031", "x1": 352, "y1": 2829.0, "x2": 430, "y2": 2950.0}]}, "nodes": [{"id": "law_651", "label": "글로벌허브센터 운영 규정", "properties": {"canonical_url": "https://rule.shu.ac.kr/law/lawView.html?id=651", "category": "G. 교무행정", "department_name": "대외국제처", "latest_revision_id": 2105, "law_id": 651}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "retrieved_at": "2026-03-24T08:17:15.419779+00:00", "snapshot_path": "raw/http/law_651_page.html", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleDocument"}, {"id": "law_651_rev_2105", "label": "글로벌허브센터 운영 규정", "properties": {"division": "제정", "effective_date": "2026-01-01 00:00:00.0", "is_latest": true, "law_id": 651, "revision_date": "2026-02-02 00:00:00.0", "revision_id": 2105}, "source_refs": [{"content_hash": "6053621ec4ed43c399e24839d46cec403008fa03f2d8175b61bd98bb0cc6e457", "crawl_run_id": "20260324T081715Z", "retrieved_at": "2026-03-24T08:17:15.419779+00:00", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/lawRevision/detail?id=2105"}], "type": "Revision"}, {"id": "dept_대외국제처", "label": "대외국제처", "properties": {"name": "대외국제처"}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "retrieved_at": "2026-03-24T08:17:15.419779+00:00", "snapshot_path": "raw/http/law_651_page.html", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "Department"}, {"id": "snapshot_20260324T081715Z_law_651_rev_2105", "label": "law_651_rev_2105", "properties": {"content_hash": "6053621ec4ed43c399e24839d46cec403008fa03f2d8175b61bd98bb0cc6e457", "crawl_run_id": "20260324T081715Z", "raw_paths": ["raw/http/law_651_page.html", "raw/http/law_651_meta.json", "raw/http/law_651_revision_2105.json"], "retrieved_at": "2026-03-24T08:17:15.419779+00:00", "snapshot_kind": "document_revision", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}, "source_refs": [{"content_hash": "6053621ec4ed43c399e24839d46cec403008fa03f2d8175b61bd98bb0cc6e457", "crawl_run_id": "20260324T081715Z", "retrieved_at": "2026-03-24T08:17:15.419779+00:00", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "SourceSnapshot"}, {"id": "law_651_rev_2105_sec_001", "label": "제1장 총칙", "properties": {"anchor_id": "6384", "document_id": "law_651_rev_2105", "law_id": 651, "order": 1, "parent_section_id": null, "revision_id": 2105, "section_type": "chapter", "text": ""}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_002", "label": "제1조(목적)", "properties": {"anchor_id": "6385", "document_id": "law_651_rev_2105", "law_id": 651, "order": 2, "parent_section_id": "law_651_rev_2105_sec_001", "revision_id": 2105, "section_type": "article", "text": "이 규정은 삼육보건대학교(이하 “대학”이라 한다)에 재학하는 외국인 유학생의 대학생활 적응 및 학업·진로·취업·정착을 지원하기 위하여 글로벌허브센터(이하 “센터”라 한다)의 설치·조직 및 운영에 필요한 사항을 정함을 목적으로 한다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_003", "label": "제2조(정의)", "properties": {"anchor_id": "6386", "document_id": "law_651_rev_2105", "law_id": 651, "order": 3, "parent_section_id": "law_651_rev_2105_sec_001", "revision_id": 2105, "section_type": "article", "text": "이 규정에서 사용하는 용어의 뜻은 다음과 같다.\n\n1. “외국인 유학생”이란 대학에 입학·편입학·교환/연수 등으로 등록하여 수학 중인 외국 국적 학생을 말한다.\n\n2. “SHU CARE 프로그램”이란 외국인 유학생의 학업·생활·비자·주거·진로·취업·정착을 통합 지원하는 비교과·상담·연계 프로그램을 말한다.\n\n3. “지원”이란 상담, 행정대행, 정보제공, 프로그램 운영, 기관연계, 위기(응급)지원 등을 포함한다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_004", "label": "제3조(적용범위)", "properties": {"anchor_id": "6387", "document_id": "law_651_rev_2105", "law_id": 651, "order": 4, "parent_section_id": "law_651_rev_2105_sec_001", "revision_id": 2105, "section_type": "article", "text": "센터의 사업은 외국인 유학생을 원칙 대상으로 하되, 필요 시 어학연수생 및 단기연수생 등으로 확대할 수 있다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_005", "label": "제2장 설치 및 기능", "properties": {"anchor_id": "6388", "document_id": "law_651_rev_2105", "law_id": 651, "order": 5, "parent_section_id": null, "revision_id": 2105, "section_type": "chapter", "text": ""}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_006", "label": "제4조(설치)", "properties": {"anchor_id": "6389", "document_id": "law_651_rev_2105", "law_id": 651, "order": 6, "parent_section_id": "law_651_rev_2105_sec_005", "revision_id": 2105, "section_type": "article", "text": "대학은 외국인 유학생 지원을 위하여 센터를 둔다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_007", "label": "제5조(기능)", "properties": {"anchor_id": "6390", "document_id": "law_651_rev_2105", "law_id": 651, "order": 7, "parent_section_id": "law_651_rev_2105_sec_005", "revision_id": 2105, "section_type": "article", "text": "센터는 다음 각 호의 업무를 수행한다.\n\n1. 외국인 유학생 학생지원(상담·고충처리·민원조정)\n\n2. SHU CARE 프로그램의 기획·운영 및 성과관리\n\n3. 비자·출입국·체류(취업처 비자 포함) 지원 및 교육(예: D-2→D-10, E-7, F 시리즈 등 특강·절차 안내)\n\n4. 생활지원(교통·은행·통신·행정절차 안내, 정서·스트레스 상담 등)\n\n5. 주거지원(기숙사·주거 정보 제공 및 연계)\n\n6. 학업지원(수강신청·과제·시험·보고서·발표 지도, 학습역량 강화 프로그램 운영)\n\n7. 한국어 능력 향상 지원(TOPIK 특강·말하기대회·응시 지원 등)\n\n8. 진로·취업·정착지원(이력서·면접, 노동법/직장문화, 취업비자, 자격증 실습 등)\n\n9. 멘토링 및 동아리·지역연계 프로그램 운영(생활·문화 정보, 언어교환, 집단상담 등)\n\n10. 외국인 유학생 지원과 관련한 학과·부서·지역기관 협력체계 구축 및 대외 홍보(다국어 안내 포함)\n\n11. 기타 외국인 유학생 지원에 필요하다고 대학이 정하는 사항"}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_008", "label": "제6조(세부사업의 예시)", "properties": {"anchor_id": "6391", "document_id": "law_651_rev_2105", "law_id": 651, "order": 8, "parent_section_id": "law_651_rev_2105_sec_005", "revision_id": 2105, "section_type": "article", "text": "센터는 제5조의 기능 수행을 위해 다음의 세부 프로그램을 운영할 수 있다.\n\n1. 신입 유학생 적응·오리엔테이션(다국어 공지·안내 포함)\n\n2. SHU Buddy(1:1 및 그룹 멘토링, 생활지원(주거·행정·의료) 포함)\n\n3. 한국어 향상(TOPIK 특강, 센터 접수대행·서류준비 지원 등)\n\n4. 학습역량 고도화(학술적 글쓰기·발표·데이터 검색 등)\n\n5. 진로·취업·정착(비자/출입국 특강 포함)"}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_009", "label": "제3장 조직 및 운영", "properties": {"anchor_id": "6392", "document_id": "law_651_rev_2105", "law_id": 651, "order": 9, "parent_section_id": null, "revision_id": 2105, "section_type": "chapter", "text": ""}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_010", "label": "제7조(센터장)", "properties": {"anchor_id": "6393", "document_id": "law_651_rev_2105", "law_id": 651, "order": 10, "parent_section_id": "law_651_rev_2105_sec_009", "revision_id": 2105, "section_type": "article", "text": "① 센터에는 센터장 1인을 두며, 센터장은 센터 업무를 총괄한다.\n\n② 센터장은 외국인 유학생 지원과 관련하여 학내·외 협력기관과의 업무협약을 추진할 수 있다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_011", "label": "제8조(직원 및 지원단)", "properties": {"anchor_id": "6394", "document_id": "law_651_rev_2105", "law_id": 651, "order": 11, "parent_section_id": "law_651_rev_2105_sec_009", "revision_id": 2105, "section_type": "article", "text": "① 센터에는 실무를 담당하는 직원을 둘 수 있다.\n\n② 센터는 프로그램 운영을 위하여 재학생 멘토 등 “학생지원단”을 둘 수 있다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_012", "label": "제4장 글로벌허브센터 운영위원회", "properties": {"anchor_id": "6395", "document_id": "law_651_rev_2105", "law_id": 651, "order": 12, "parent_section_id": null, "revision_id": 2105, "section_type": "chapter", "text": ""}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_013", "label": "제9조(설치)", "properties": {"anchor_id": "6396", "document_id": "law_651_rev_2105", "law_id": 651, "order": 13, "parent_section_id": "law_651_rev_2105_sec_012", "revision_id": 2105, "section_type": "article", "text": "센터의 주요 정책과 사업을 심의하기 위하여 글로벌허브센터 운영위원회(이하 “위원회”라 한다)를 둔다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_014", "label": "제10조(구성)", "properties": {"anchor_id": "6397", "document_id": "law_651_rev_2105", "law_id": 651, "order": 14, "parent_section_id": "law_651_rev_2105_sec_012", "revision_id": 2105, "section_type": "article", "text": "① 위원회는 다음 각 호의 위원으로 구성한다.\n\n1. 글로벌허브센터장(의장)\n\n2. 한국어교육원 팀장(서기)\n\n3. 글로벌허브센터 직원(필요 인원)\n\n4. 글로벌융합과 학과장\n\n5. 글로벌요양서비스과 학과장\n\n② 의장은 위원회를 대표하고 회무를 통할한다.\n\n③ 서기는 회의자료 작성, 회의록 작성·보관 및 실무를 관장한다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_015", "label": "제11조(임기)", "properties": {"anchor_id": "6398", "document_id": "law_651_rev_2105", "law_id": 651, "order": 15, "parent_section_id": "law_651_rev_2105_sec_012", "revision_id": 2105, "section_type": "article", "text": "보직에 따른 당연직 위원의 임기는 해당 보직 재임기간으로 한다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_016", "label": "제12조(기능)", "properties": {"anchor_id": "6399", "document_id": "law_651_rev_2105", "law_id": 651, "order": 16, "parent_section_id": "law_651_rev_2105_sec_012", "revision_id": 2105, "section_type": "article", "text": "위원회는 다음 각 호의 사항을 심의·조정한다.\n\n1. 외국인 유학생 지원 기본계획 및 연간 사업계획\n\n2. SHU CARE 프로그램의 신설·폐지·평가 및 환류\n\n3. 비자·생활·주거·학업·진로·취업 지원체계의 개선\n\n4. 학과(글로벌융합과, 글로벌요양서비스과)와의 협업 및 역할분담\n\n5. 예산 편성(안) 및 집행의 적정성, 외부재원(사업비) 연계\n\n6. 외국인 유학생 응급의료 지원체계 운영(제5장 관련)\n\n7. 그 밖에 의장이 부의하는 사항"}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_017", "label": "제13조(회의)", "properties": {"anchor_id": "6400", "document_id": "law_651_rev_2105", "law_id": 651, "order": 17, "parent_section_id": "law_651_rev_2105_sec_012", "revision_id": 2105, "section_type": "article", "text": "① 정기회의는 학기별 1회 개최함을 원칙으로 하며, 필요 시 의장이 임시회의를 소집할 수 있다.\n\n② 회의는 재적위원 과반수 출석으로 개의하고, 출석위원 과반수 찬성으로 의결한다.\n\n③ 서기는 회의록을 작성하여 의장 확인 후 5년간 보관한다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_018", "label": "제14조(자문 및 소위원회)", "properties": {"anchor_id": "6401", "document_id": "law_651_rev_2105", "law_id": 651, "order": 18, "parent_section_id": "law_651_rev_2105_sec_012", "revision_id": 2105, "section_type": "article", "text": "① 위원회는 안건의 전문성 확보를 위해 관련 교원·전문가를 자문위원으로 위촉할 수 있다.\n\n② 특히 응급의료·안전 관련 안건은 별도의 소위원회(또는 실무협의체)를 둘 수 있다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_019", "label": "제5장 외국인 유학생 응급의료 지원체계", "properties": {"anchor_id": "6402", "document_id": "law_651_rev_2105", "law_id": 651, "order": 19, "parent_section_id": null, "revision_id": 2105, "section_type": "chapter", "text": ""}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_020", "label": "제15조(목적)", "properties": {"anchor_id": "6403", "document_id": "law_651_rev_2105", "law_id": 651, "order": 20, "parent_section_id": "law_651_rev_2105_sec_019", "revision_id": 2105, "section_type": "article", "text": "이 장은 외국인 유학생의 응급상황에서 신속한 의료접근을 보장하고, 치료비 부담으로 인한 학업중단을 예방하기 위하여 응급의료 지원체계를 구축·운영함을 목적으로 한다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_021", "label": "제16조(응급의료 지원체계의 구성)", "properties": {"anchor_id": "6404", "document_id": "law_651_rev_2105", "law_id": 651, "order": 21, "parent_section_id": "law_651_rev_2105_sec_019", "revision_id": 2105, "section_type": "article", "text": "센터는 다음 각 호의 체계를 구축·운영한다.\n\n1. 24시간 응급의료 핫라인 운영(유학생 전용 연락체계)\n\n2. 상황평가(트리아지) 및 119 등 공적 긴급이송 연계\n\n3. 협력병원(응급실 포함) 안내 및 내원 지원\n\n4. 통·번역 지원(가능한 범위에서) 및 동행지원\n\n5. 의료보험(국민건강보험/사보험) 안내 및 사후정산 지원\n\n6. 사건·사고 발생 시 학내 보고 및 재발방지 환류"}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_022", "label": "제17조(응급의료지원금의 설치)", "properties": {"anchor_id": "6405", "document_id": "law_651_rev_2105", "law_id": 651, "order": 22, "parent_section_id": "law_651_rev_2105_sec_019", "revision_id": 2105, "section_type": "article", "text": "① 대학은 외국인 유학생의 응급상황 치료비를 지원하기 위하여 응급의료지원금(이하 “지원금”이라 한다)을 둘 수 있다.\n\n② 지원금의 재원은 대학회계, 혁신지원사업비 등 외부재원, 기부금, 기타 수입으로 한다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_023", "label": "제18조(지원대상 및 지원범위)", "properties": {"anchor_id": "6406", "document_id": "law_651_rev_2105", "law_id": 651, "order": 23, "parent_section_id": "law_651_rev_2105_sec_019", "revision_id": 2105, "section_type": "article", "text": "① 지원대상은 다음 각 호 중 하나에 해당하는 외국인 유학생으로 한다.\n\n1. 응급질환 또는 사고 등으로 즉시 진료가 필요한 자\n\n2. 긴급치료(준응급 포함)가 필요하나 비용부담이 과중하여 치료가 지연될 우려가 있는 자\n\n② 지원범위는 본인부담금(급여 본인부담 및 비급여 일부)으로 하되, 비급여는 필요성·긴급성·형평성을 고려하여 위원회(또는 소위원회)가 정한다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_024", "label": "제19조(지원기준 및 한도)", "properties": {"anchor_id": "6407", "document_id": "law_651_rev_2105", "law_id": 651, "order": 24, "parent_section_id": "law_651_rev_2105_sec_019", "revision_id": 2105, "section_type": "article", "text": "① 지원금은 다음 기준을 원칙으로 하되, 개별 사정에 따라 위원회가 조정할 수 있다.\n\n응급 질환: 1회 최대 1,000,000원, 연간 최대 2,000,000원\n\n긴급 치료: 1회 최대 500,000원, 연간 최대 1,000,000원\n\n② 건강보험 가입자의 경우 본인부담금의 80% 이내, 미가입자의 경우 총 치료비의 50~70% 범위에서 지원할 수 있다. 다만, 대상자 적용 범위 확대 시 지원한도를 조정할 수 있다.\n\n③ 동일 사유의 반복 신청, 고의·중과실, 허위서류 제출 등 부정수급이 확인되는 경우 지원결정 취소 및 환수할 수 있다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_025", "label": "제20조(신청 및 심사절차)", "properties": {"anchor_id": "6408", "document_id": "law_651_rev_2105", "law_id": 651, "order": 25, "parent_section_id": "law_651_rev_2105_sec_019", "revision_id": 2105, "section_type": "article", "text": "① 신청은 원칙적으로 본인 신청으로 하되, 응급상황에서는 센터가 대리 신청할 수 있다.\n\n② 신청서류는 다음 각 호로 한다.\n\n1. 지원금 신청서(개인정보·민감정보 처리 동의 포함)\n\n2. 진단서 또는 진료확인서(응급실 기록 포함 가능)\n\n3. 진료비 계산서·영수증(세부내역 포함)\n\n4. 보험가입 여부 확인서류(해당 시)\n\n③ 센터는 접수 후 7일 이내 심사를 원칙으로 하며, 보완이 필요한 경우 기간을 연장할 수 있다.\n\n④ 긴급성이 인정되는 경우, 의장은 사전 승인으로 우선 지원(또는 병원 직접 지급)을 결정할 수 있으며, 사후에 위원회에 보고한다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_026", "label": "제21조(심사체계)", "properties": {"anchor_id": "6409", "document_id": "law_651_rev_2105", "law_id": 651, "order": 26, "parent_section_id": "law_651_rev_2105_sec_019", "revision_id": 2105, "section_type": "article", "text": "① 지원금 심사는 글로벌허브센터 운영위원회가 수행한다.\n\n② 의장은 심사의 공정성과 전문성 확보를 위해 간호·보건의료 분야 교원 또는 외부 의료전문가를 자문위원으로 참여시킬 수 있다(제14조)."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_027", "label": "제22조(기록관리 및 비밀유지)", "properties": {"anchor_id": "6410", "document_id": "law_651_rev_2105", "law_id": 651, "order": 27, "parent_section_id": "law_651_rev_2105_sec_019", "revision_id": 2105, "section_type": "article", "text": "① 센터는 지원금 운영대장, 지급결정서, 증빙서류를 5년간 보관한다.\n\n② 의료정보 등 민감정보는 관련 법령 및 대학 개인정보보호 기준에 따라 최소범위로 처리하며, 목적 외 이용·제공을 금지한다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_028", "label": "제23조(교육 및 예방)", "properties": {"anchor_id": "6411", "document_id": "law_651_rev_2105", "law_id": 651, "order": 28, "parent_section_id": "law_651_rev_2105_sec_019", "revision_id": 2105, "section_type": "article", "text": "① 센터는 매 학기 유학생 대상 응급대응 안내(119 이용, 응급실 이용 절차, 보험/비자 연계)를 실시할 수 있다.\n\n② 센터는 학과·기숙사·지역기관과 협력하여 응급상황 대응 매뉴얼을 최신화한다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_029", "label": "제6장 보칙", "properties": {"anchor_id": "6412", "document_id": "law_651_rev_2105", "law_id": 651, "order": 29, "parent_section_id": null, "revision_id": 2105, "section_type": "chapter", "text": ""}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_030", "label": "제24조(성과평가 및 환류)", "properties": {"anchor_id": "6413", "document_id": "law_651_rev_2105", "law_id": 651, "order": 30, "parent_section_id": "law_651_rev_2105_sec_029", "revision_id": 2105, "section_type": "article", "text": "센터는 프로그램 만족도, 참여율, 중도탈락 예방, 취업·비자전환 등 성과지표를 설정하여 매년 위원회에 보고하고 개선계획을 수립한다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_031", "label": "제25조(준용)", "properties": {"anchor_id": "6414", "document_id": "law_651_rev_2105", "law_id": 651, "order": 31, "parent_section_id": "law_651_rev_2105_sec_029", "revision_id": 2105, "section_type": "article", "text": "이 규정에 정하지 아니한 사항은 대학의 관련 규정 및 위원회 의결에 따른다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}, {"id": "law_651_rev_2105_sec_032", "label": "부 칙(2026.2.2.)", "properties": {"anchor_id": "6415", "document_id": "law_651_rev_2105", "law_id": 651, "order": 32, "parent_section_id": null, "revision_id": 2105, "section_type": "addendum", "text": "1. 이 규정은 2026년 1월 1일부터 시행한다."}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "type": "RuleSection"}], "edges": [{"from": "law_651", "id": "edge_law_651_has_revision_2105", "properties": {}, "source_refs": [{"content_hash": "6053621ec4ed43c399e24839d46cec403008fa03f2d8175b61bd98bb0cc6e457", "crawl_run_id": "20260324T081715Z", "retrieved_at": "2026-03-24T08:17:15.419779+00:00", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/lawRevision/detail?id=2105"}], "to": "law_651_rev_2105", "type": "HAS_REVISION"}, {"from": "law_651", "id": "edge_law_651_issued_by_dept_대외국제처", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "retrieved_at": "2026-03-24T08:17:15.419779+00:00", "snapshot_path": "raw/http/law_651_page.html", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "dept_대외국제처", "type": "ISSUED_BY"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_derived_from_snapshot", "properties": {}, "source_refs": [{"content_hash": "6053621ec4ed43c399e24839d46cec403008fa03f2d8175b61bd98bb0cc6e457", "crawl_run_id": "20260324T081715Z", "retrieved_at": "2026-03-24T08:17:15.419779+00:00", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_001", "properties": {"order": 1}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_001", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_001", "id": "edge_law_651_rev_2105_sec_001_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_002", "properties": {"order": 2}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_002", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_002", "id": "edge_law_651_rev_2105_sec_002_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_001", "id": "edge_law_651_rev_2105_sec_001_parent_of_law_651_rev_2105_sec_002", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_002", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_003", "properties": {"order": 3}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_003", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_003", "id": "edge_law_651_rev_2105_sec_003_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_001", "id": "edge_law_651_rev_2105_sec_001_parent_of_law_651_rev_2105_sec_003", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_003", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_004", "properties": {"order": 4}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_004", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_004", "id": "edge_law_651_rev_2105_sec_004_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_001", "id": "edge_law_651_rev_2105_sec_001_parent_of_law_651_rev_2105_sec_004", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_004", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_005", "properties": {"order": 5}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_005", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_005", "id": "edge_law_651_rev_2105_sec_005_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_006", "properties": {"order": 6}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_006", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_006", "id": "edge_law_651_rev_2105_sec_006_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_005", "id": "edge_law_651_rev_2105_sec_005_parent_of_law_651_rev_2105_sec_006", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_006", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_007", "properties": {"order": 7}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_007", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_007", "id": "edge_law_651_rev_2105_sec_007_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_005", "id": "edge_law_651_rev_2105_sec_005_parent_of_law_651_rev_2105_sec_007", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_007", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_008", "properties": {"order": 8}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_008", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_008", "id": "edge_law_651_rev_2105_sec_008_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_005", "id": "edge_law_651_rev_2105_sec_005_parent_of_law_651_rev_2105_sec_008", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_008", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_009", "properties": {"order": 9}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_009", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_009", "id": "edge_law_651_rev_2105_sec_009_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_010", "properties": {"order": 10}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_010", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_010", "id": "edge_law_651_rev_2105_sec_010_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_009", "id": "edge_law_651_rev_2105_sec_009_parent_of_law_651_rev_2105_sec_010", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_010", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_011", "properties": {"order": 11}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_011", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_011", "id": "edge_law_651_rev_2105_sec_011_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_009", "id": "edge_law_651_rev_2105_sec_009_parent_of_law_651_rev_2105_sec_011", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_011", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_012", "properties": {"order": 12}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_012", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_012", "id": "edge_law_651_rev_2105_sec_012_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_013", "properties": {"order": 13}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_013", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_013", "id": "edge_law_651_rev_2105_sec_013_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_012", "id": "edge_law_651_rev_2105_sec_012_parent_of_law_651_rev_2105_sec_013", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_013", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_014", "properties": {"order": 14}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_014", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_014", "id": "edge_law_651_rev_2105_sec_014_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_012", "id": "edge_law_651_rev_2105_sec_012_parent_of_law_651_rev_2105_sec_014", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_014", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_015", "properties": {"order": 15}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_015", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_015", "id": "edge_law_651_rev_2105_sec_015_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_012", "id": "edge_law_651_rev_2105_sec_012_parent_of_law_651_rev_2105_sec_015", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_015", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_016", "properties": {"order": 16}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_016", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_016", "id": "edge_law_651_rev_2105_sec_016_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_012", "id": "edge_law_651_rev_2105_sec_012_parent_of_law_651_rev_2105_sec_016", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_016", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_017", "properties": {"order": 17}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_017", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_017", "id": "edge_law_651_rev_2105_sec_017_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_012", "id": "edge_law_651_rev_2105_sec_012_parent_of_law_651_rev_2105_sec_017", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_017", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_018", "properties": {"order": 18}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_018", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_018", "id": "edge_law_651_rev_2105_sec_018_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_012", "id": "edge_law_651_rev_2105_sec_012_parent_of_law_651_rev_2105_sec_018", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_018", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_019", "properties": {"order": 19}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_019", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_019", "id": "edge_law_651_rev_2105_sec_019_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_020", "properties": {"order": 20}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_020", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_020", "id": "edge_law_651_rev_2105_sec_020_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_019", "id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_020", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_020", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_021", "properties": {"order": 21}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_021", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_021", "id": "edge_law_651_rev_2105_sec_021_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_019", "id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_021", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_021", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_022", "properties": {"order": 22}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_022", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_022", "id": "edge_law_651_rev_2105_sec_022_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_019", "id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_022", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_022", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_023", "properties": {"order": 23}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_023", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_023", "id": "edge_law_651_rev_2105_sec_023_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_019", "id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_023", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_023", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_024", "properties": {"order": 24}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_024", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_024", "id": "edge_law_651_rev_2105_sec_024_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_019", "id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_024", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_024", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_025", "properties": {"order": 25}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_025", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_025", "id": "edge_law_651_rev_2105_sec_025_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_019", "id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_025", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_025", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_026", "properties": {"order": 26}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_026", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_026", "id": "edge_law_651_rev_2105_sec_026_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_019", "id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_026", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_026", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_027", "properties": {"order": 27}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_027", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_027", "id": "edge_law_651_rev_2105_sec_027_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_019", "id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_027", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_027", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_028", "properties": {"order": 28}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_028", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_028", "id": "edge_law_651_rev_2105_sec_028_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_019", "id": "edge_law_651_rev_2105_sec_019_parent_of_law_651_rev_2105_sec_028", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_028", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_029", "properties": {"order": 29}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_029", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_029", "id": "edge_law_651_rev_2105_sec_029_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_030", "properties": {"order": 30}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_030", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_030", "id": "edge_law_651_rev_2105_sec_030_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_029", "id": "edge_law_651_rev_2105_sec_029_parent_of_law_651_rev_2105_sec_030", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_030", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_031", "properties": {"order": 31}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_031", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_031", "id": "edge_law_651_rev_2105_sec_031_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}, {"from": "law_651_rev_2105_sec_029", "id": "edge_law_651_rev_2105_sec_029_parent_of_law_651_rev_2105_sec_031", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_031", "type": "PARENT_SECTION"}, {"from": "law_651_rev_2105", "id": "edge_law_651_rev_2105_has_section_law_651_rev_2105_sec_032", "properties": {"order": 32}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "law_651_rev_2105_sec_032", "type": "HAS_SECTION"}, {"from": "law_651_rev_2105_sec_032", "id": "edge_law_651_rev_2105_sec_032_derived_from_snapshot", "properties": {}, "source_refs": [{"crawl_run_id": "20260324T081715Z", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}], "to": "snapshot_20260324T081715Z_law_651_rev_2105", "type": "DERIVED_FROM"}], "provenance": [{"content_hash": "6053621ec4ed43c399e24839d46cec403008fa03f2d8175b61bd98bb0cc6e457", "crawl_run_id": "20260324T081715Z", "id": "snapshot_20260324T081715Z_law_651_rev_2105", "raw_paths": ["raw/http/law_651_page.html", "raw/http/law_651_meta.json", "raw/http/law_651_revision_2105.json"], "retrieved_at": "2026-03-24T08:17:15.419779+00:00", "snapshot_path": "raw/http/law_651_revision_2105.json", "source_url": "https://rule.shu.ac.kr/law/lawView.html?id=651"}]};
+    const detailsPanel = document.getElementById("details-panel");
+    const nodeGroupsPanel = document.getElementById("node-groups");
+    const nodeIndex = Object.fromEntries(graphData.nodes.map((node) => [node.id, node]));
+
+    function escapeHtml(value) {
+      return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function renderNodeGroups() {
+      const groups = new Map();
+      for (const node of graphData.nodes) {
+        const current = groups.get(node.type) || [];
+        current.push(node);
+        groups.set(node.type, current);
+      }
+
+      const fragments = [];
+      for (const [type, nodes] of Array.from(groups.entries()).sort()) {
+        const buttons = nodes
+          .sort((left, right) => left.id.localeCompare(right.id))
+          .map((node) => `<button class="node-button" onclick="showNode('${node.id}')">${escapeHtml(node.label)}</button>`)
+          .join("");
+        fragments.push(`<div class="node-group"><h3>${escapeHtml(type)} (${nodes.length})</h3><div class="node-button-list">${buttons}</div></div>`);
+      }
+      nodeGroupsPanel.innerHTML = fragments.join("");
+    }
+
+    function showNode(nodeId) {
+      const node = nodeIndex[nodeId];
+      if (!node) {
+        return;
+      }
+
+      const relatedEdges = graphData.edges.filter((edge) => edge.from === nodeId || edge.to === nodeId);
+      const payload = {
+        node,
+        related_edges: relatedEdges,
+        provenance_matches: graphData.provenance.filter((entry) => entry.id === nodeId),
+      };
+      detailsPanel.innerHTML = escapeHtml(JSON.stringify(payload, null, 2));
+    }
+
+    renderNodeGroups();
+  </script>
+</body>
+</html>
